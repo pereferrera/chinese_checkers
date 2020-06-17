@@ -35,22 +35,20 @@ if __name__ == "__main__":
     gui = PygameGUI(game)
     manual_player = ManualPlayer(gui)
 
+    def print_metrics(player):
+        print(f"""
+        Player 2:
+            cva={combined_vertical_advance(game, player)} 
+            iss_cl={inv_squared_sum_center_line(game, player)} 
+            iss_dc={inv_squared_sum_dest_corner(game, player)}
+            ivs={inv_vertical_scatter(game, player)}""")
+
     while(game.state() == 0):
         print(f'Turn: {player_turn}')
         assert game.player_turn == player_turn
         gui.update()
-        print(f"""
-            Player 1:
-                cva={combined_vertical_advance(game, 1)} 
-                iss_cl={inv_squared_sum_center_line(game, 1)} 
-                iss_dc={inv_squared_sum_dest_corner(game, 1)}
-                ivs={inv_vertical_scatter(game, 1)}""")
-        print(f"""
-            Player 2:
-                cva={combined_vertical_advance(game, 2)} 
-                iss_cl={inv_squared_sum_center_line(game, 2)} 
-                iss_dc={inv_squared_sum_dest_corner(game, 2)}
-                ivs={inv_vertical_scatter(game, 2)}""")
+        for player in [1, 2]:
+            print_metrics(player)
 
         if player_turn not in manual_players:
             strategy = ai_players[player_turn]
@@ -60,6 +58,7 @@ if __name__ == "__main__":
         else:
             print("It's manual's player turn!")
             manual_player.move(game, player_turn)
+
         if game.player_turn == player_turn:
             game.rotate_turn()
 
