@@ -9,7 +9,6 @@ from chinese_checkers.cc_heuristics import (
     combined_vertical_advance,
     inv_squared_sum_center_line,
     inv_squared_sum_dest_corner,
-    inv_vertical_scatter,
     combined_heuristic
 )
 
@@ -41,7 +40,7 @@ if __name__ == "__main__":
             cva={combined_vertical_advance(game, player)} 
             iss_cl={inv_squared_sum_center_line(game, player)} 
             iss_dc={inv_squared_sum_dest_corner(game, player)}
-            ivs={inv_vertical_scatter(game, player)}""")
+        """)
 
     while(game.state() == 0):
         print(f'Turn: {player_turn}')

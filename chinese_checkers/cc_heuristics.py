@@ -39,31 +39,6 @@ def combined_vertical_advance(game: CCGame, player: int):
     return combined_va / (heigth * pieces)
 
 
-def inv_vertical_scatter(game: CCGame, player: int):
-    """
-    Returns:
-    --------
-    float
-        Between 0 and 1, how clustered pieces of this player are in the
-        vertical axis.
-        According to one of the papers, this metric doesn't matter (doesn't
-        help achieving winning the game).
-    """
-
-    heigth = len(game.board)
-
-    min_row = heigth
-    max_row = 0
-
-    for row in range(0, heigth):
-        for column in range(0, len(game.board[row])):
-            if game.board[row][column] == player:
-                min_row = min(min_row, row)
-                max_row = max(max_row, row)
-
-    return 1 - ((max_row - min_row) / heigth)
-
-
 def inv_squared_sum_center_line(game: CCGame, player: int):
     """
     Returns:
