@@ -83,8 +83,13 @@ class CCGame:
         return (dest_row, dest_column)
 
     def rotate_turn(self):
+        """
+        Rotate the player's turn (i.e. a player is jumping and doesn't want
+        to jump more). Returns the instance of the game.
+        """        
         self.player_turn = 2 if self.player_turn == 1 else 1
         self.player_can_only_jump = False
+        return self
 
     def _dest_jump_position(self, row: int, column: int, movement: CCMovement):
         dest_row, dest_column = self._dest_position(row, column, movement)
