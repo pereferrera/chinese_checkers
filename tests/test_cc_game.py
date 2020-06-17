@@ -4,7 +4,8 @@ from chinese_checkers.cc_movement import CCMovement
 from chinese_checkers.cc_game import CCGame
 
 from constants import (
-    TEST_BOARD, TEST_BOARD_PLAYER_1_WINS, TEST_BOARD_PLAYER_2_WINS
+    TEST_BOARD, TEST_BOARD_PLAYER_1_WINS, TEST_BOARD_PLAYER_2_WINS,
+    TEST_BOARD_PLAYER_1_DOES_NOT_WIN
 )
 
 
@@ -27,6 +28,12 @@ class TestCCGame(unittest.TestCase):
             game = CCGame(width=5)
             game.board = TEST_BOARD_PLAYER_1_WINS
             self.assertEqual(1,
+                             game.state())
+            
+        def test_state_player_1_does_not_win(self):
+            game = CCGame(width=5)
+            game.board = TEST_BOARD_PLAYER_1_DOES_NOT_WIN
+            self.assertEqual(0,
                              game.state())
 
         def test_state_player_2_wins(self):

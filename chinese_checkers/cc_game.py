@@ -171,7 +171,7 @@ class CCGame:
         return self.player_turn
 
     def apply_move_sequence(self, move_sequence):
-        """Apply a sequence of possibly more than once move (e.g. by
+        """Apply a sequence of possibly more than one move (e.g. by
         jumping). move_sequence is a tuple:
          - 0: list of positions the move sequence will traverse
          - 1: list of CCMovement directions the move sequence will perform

@@ -5,11 +5,17 @@ from chinese_checkers.cc_game import CCGame
 from chinese_checkers.cc_heuristics import combined_vertical_advance
 
 
+"""
+TODO Optimize this by avoiding deep copies
+"""
+
 class GreedyStrategy(CCReasoner):
 
-    def __init__(self, steps=1, alpha_beta_pruning=True):
+    def __init__(self, steps=1, alpha_beta_pruning=True,
+                 heuristic=combined_vertical_advance):
         self.steps = steps
         self.alpha_beta_pruning = alpha_beta_pruning
+        self.heuristic = heuristic
 
     def _select_move(self,
                      game: CCGame,
@@ -64,13 +70,13 @@ class GreedyStrategy(CCReasoner):
                         # approximate the score of the game by
                         # subtracting heuristics
                         curr_score = (
-                            combined_vertical_advance(m_game, 1) -
-                            combined_vertical_advance(m_game, 2)
+                            self.heuristic(m_game, 1) -
+                            self.heuristic(m_game, 2)
                         )
                     else:
                         curr_score = (
-                            combined_vertical_advance(m_game, 2) -
-                            combined_vertical_advance(m_game, 1)
+                            self.heuristic(m_game, 2) -
+                            self.heuristic(m_game, 1)
                         )
                 else:
                     curr_score = self._select_move(m_game,
@@ -92,14 +98,11 @@ class GreedyStrategy(CCReasoner):
             if self.alpha_beta_pruning:
                 if maximizing:
                     alpha = max(alpha, best_score)
-                    if beta <= alpha:
-                        # beta pruning
-                        return (best_move, best_score)
                 else:
                     beta = min(beta, best_score)
-                    if beta <= alpha:
-                        # alpha pruning
-                        return (best_move, best_score)
+                if beta <= alpha:
+                    # alpha pruning
+                    return (best_move, best_score)
 
         return (best_move, best_score)
 
