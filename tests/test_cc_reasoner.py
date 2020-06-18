@@ -9,8 +9,7 @@ class TestCCReasoner(unittest.TestCase):
     def test_available_moves(self):
         game = CCGame(width=5)
         moves = CCReasoner.available_moves(game, 1)
-
-        self.assertEqual(list(moves.values()),
+        self.assertEqual(moves,
                          [([(1, 0), (3, 0)], [CCMovement.LS]),
                           ([(1, 0), (3, 2)], [CCMovement.RS]),
                           ([(1, 1), (3, 1)], [CCMovement.LS]),
@@ -29,11 +28,11 @@ class TestCCReasoner(unittest.TestCase):
         moves_2 = CCReasoner.available_moves(game, 2)
         self.assertEqual(len(moves_1), len(moves_2))
 
-    def test_available_moves_deepth_2(self):
+    def test_available_moves_depth_2(self):
         game = CCGame(width=5)
         game.move(2, 0, CCMovement.RS)
         game.rotate_turn()
-        moves = list(CCReasoner.available_moves(game, 1).values())
+        moves = CCReasoner.available_moves(game, 1)
         self.assertTrue(([(0, 0), (2, 0), (4, 2)],
                          [CCMovement.LS, CCMovement.RS]) in moves)
         self.assertTrue(([(1, 0), (3, 2), (3, 0)],

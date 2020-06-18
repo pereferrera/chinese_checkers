@@ -11,13 +11,24 @@ from constants import (
 
 class TestCCGame(unittest.TestCase):
 
-        def test_board(self):
+        def test_board_equality_equals(self):
             game = CCGame(width=5)
             self.assertEqual(game.board,
                              TEST_BOARD)
             game_2 = CCGame(width=5)
             self.assertTrue(game == game_2)
             self.assertEqual(1, len(set([game, game_2])))
+            
+        def test_board_equality_non_equals(self):
+            game_1 = CCGame(width=5)
+            game_1.board[1][0] = 0
+            game_1.board[3][0] = 1
+            game_2 = CCGame(width=5)
+            game_2.board[1][0] = 0
+            game_2.board[3][2] = 1
+            
+            self.assertFalse(game_1 == game_2)
+            self.assertEqual(2, len(set([game_1, game_2])))
 
         def test_state_playing(self):
             game = CCGame(width=5)

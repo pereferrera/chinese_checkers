@@ -16,12 +16,13 @@ from chinese_checkers.cc_heuristics import (
 if __name__ == "__main__":
     random.seed(1)
 
-    game = CCGame(width=6, player_row_spawn=3)
+    game = CCGame(width=9, player_row_spawn=4)
 
-    manual_players = set([2])
+#    manual_players = set([2])
+    manual_players = set()
     ai_players = {
-        1: GreedyStrategy(steps=0, heuristic=combined_heuristic),
-        2: GreedyStrategy(steps=0, heuristic=combined_vertical_advance)
+        1: GreedyStrategy(steps=1, heuristic=combined_heuristic),
+        2: GreedyStrategy(steps=0, heuristic=combined_heuristic)
     }
 
     start = time.time()

@@ -1,8 +1,5 @@
-from copy import deepcopy
-
 from chinese_checkers.cc_game import CCGame
 from chinese_checkers.cc_movement import CCMovement
-from chinese_checkers.exceptions import InvalidMoveException
 
 
 class CCReasoner():
@@ -15,49 +12,52 @@ class CCReasoner():
                          previous_moves: list=[],
                          previous_positions: list=[]):
         """
-        Returns a dict where the keys are the CCGame state after a move
-        and the values are the sequence (list) of movements that the player
-        can make to end up in that state, considering the piece found at
-        'row' and 'column'
+        Returns a dict a list of movements that the player
+        can make, considering the piece found at 'row' and 'column'
         """
-        moves = {}
+        moves = []
+        jumping = game.player_can_only_jump
+
+        def undo_movement():
+            game.undo_last_move()
+            if not jumping and game.player_can_only_jump:
+                # reset jumping state
+                game.player_can_only_jump = False
+            if game.player_turn != player:
+                game.rotate_turn()
 
         for movement in CCMovement:
-            m_game = deepcopy(game)
-            try:
-                turn = m_game.move(row, column, movement)
-                if (m_game.moved_to_row,
-                        m_game.moved_to_column) in previous_positions:
+            if game.can_move(row, column, movement):
+                turn = game.move(row, column, movement)
+                if (game.moved_to_row[-1],
+                        game.moved_to_column[-1]) in previous_positions:
                     # we already passed through this state, avoid
                     # infinite recursion
+                    undo_movement()
                     continue
-                current_positions = deepcopy(previous_positions)
-                current_positions.append((m_game.moved_to_row,
-                                          m_game.moved_to_column))
-                current_moves = deepcopy(previous_moves)
-                current_moves.append(movement)
-                moves[m_game] = (current_positions, current_moves)
+                previous_positions.append((game.moved_to_row[-1],
+                                           game.moved_to_column[-1]))
+                previous_moves.append(movement)
+                moves.append(([*previous_positions], [*previous_moves]))
                 if turn == player:
                     # turn hasn't rotated -> current piece can still jump more
-                    moves.update(CCReasoner._available_moves(
-                        m_game,
-                        m_game.moved_to_row,
-                        m_game.moved_to_column,
+                    moves += (CCReasoner._available_moves(
+                        game,
+                        game.moved_to_row[-1],
+                        game.moved_to_column[-1],
                         player,
-                        current_moves,
-                        current_positions))
-            except InvalidMoveException:
-                # move not allowed, skip
-                pass
+                        previous_moves,
+                        previous_positions))
+                previous_positions.pop()
+                previous_moves.pop()
+                undo_movement()
 
         return moves
 
     @staticmethod
     def available_moves(game: CCGame, player: int):
         """
-        Returns a dict where the keys are the CCGame state after a move
-        and the values are the sequence (list) of movements that the player
-        can make to end up in that state.
+        Returns a list of movements that the player can make.
         The value sequence is made of pairs in which:
         - position 0: contains the list of board positions that the piece
             can traverse
@@ -67,18 +67,18 @@ class CCReasoner():
         if player != game.player_turn:
             return {}
 
-        moves = {}
+        moves = []
 
         for row in range(0, len(game.board)):
             for column in range(0, len(game.board[row])):
                 # if there is a piece from this player at this position,
                 # check what can we do with it
                 if game.board[row][column] == player:
-                    moves.update(CCReasoner._available_moves(game,
-                                                             row,
-                                                             column,
-                                                             player,
-                                                             [],
-                                                             [(row, column)]))
+                    moves += CCReasoner._available_moves(game,
+                                                         row,
+                                                         column,
+                                                         player,
+                                                         [],
+                                                         [(row, column)])
 
         return moves

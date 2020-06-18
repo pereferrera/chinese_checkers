@@ -14,4 +14,4 @@ class RandomStrategy(CCReasoner):
             #CCReasoner.available_moves() 
         """
         moves = self.available_moves(game, player)
-        return random.choice(list(moves.values()))
+        return random.choice(moves)

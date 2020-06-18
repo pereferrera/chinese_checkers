@@ -10,6 +10,8 @@ from chinese_checkers.exceptions import InvalidMoveException
 
 class CCGame:
 
+    NORTH_MOVEMENTS = set([CCMovement.LN, CCMovement.RN])
+    SOUTH_MOVEMENTS = set([CCMovement.LS, CCMovement.RS])
     # minimum width of longest row of the board
     MIN_BOARD_WIDTH = 5
 
@@ -35,10 +37,16 @@ class CCGame:
         # player 2
         self.board += [[2] * i for i in reversed(
             range(1, self.player_row_spawn + 1))]
+        self.half_board = int(len(self.board) / 2)
 
         # player 1 always starts
         self.player_turn = 1
         self.player_can_only_jump = False
+
+        self.moved_row = []
+        self.moved_column = []
+        self.moved_to_row = []
+        self.moved_to_column = []
 
     def within_bounds(self, row: int, column: int):
         """
@@ -57,27 +65,27 @@ class CCGame:
         """
         dest_row = row
         dest_column = column
-        half_board = int(len(self.board) / 2)
 
-        if(movement in [CCMovement.LN, CCMovement.RN]):
+        if(movement in self.NORTH_MOVEMENTS):
             dest_row -= 1
-        elif(movement in [CCMovement.LS, CCMovement.RS]):
+        elif(movement in self.SOUTH_MOVEMENTS):
             dest_row += 1
-        if(movement == CCMovement.L):
+        elif(movement == CCMovement.L):
             dest_column -= 1
         elif(movement == CCMovement.R):
             dest_column += 1
+
         if(movement == CCMovement.LN):
-            if(dest_row < half_board):
+            if(dest_row < self.half_board):
                 dest_column -= 1
-        if(movement == CCMovement.RS):
-            if(dest_row <= half_board):
+        elif(movement == CCMovement.RS):
+            if(dest_row <= self.half_board):
                 dest_column += 1
-        if(movement == CCMovement.LS):
-            if(dest_row > half_board):
+        elif(movement == CCMovement.LS):
+            if(dest_row > self.half_board):
                 dest_column -= 1
-        if(movement == CCMovement.RN):
-            if(dest_row >= half_board):
+        elif(movement == CCMovement.RN):
+            if(dest_row >= self.half_board):
                 dest_column += 1
 
         return (dest_row, dest_column)
@@ -86,7 +94,7 @@ class CCGame:
         """
         Rotate the player's turn (i.e. a player is jumping and doesn't want
         to jump more). Returns the instance of the game.
-        """        
+        """
         self.player_turn = 2 if self.player_turn == 1 else 1
         self.player_can_only_jump = False
         return self
@@ -112,10 +120,31 @@ class CCGame:
         self.board[from_row][from_column] = 0
 
         # with these variables we could e.g. undo the last movement
-        self.moved_row = from_row
-        self.moved_column = from_column
-        self.moved_to_row = dest_row
-        self.moved_to_column = dest_column
+        self.moved_row.append(from_row)
+        self.moved_column.append(from_column)
+        self.moved_to_row.append(dest_row)
+        self.moved_to_column.append(dest_column)
+
+    def undo_last_move(self):
+        from_row = self.moved_to_row.pop()
+        from_column = self.moved_to_column.pop()
+        self.board[self.moved_row.pop()][self.moved_column.pop()] =\
+            self.board[from_row][from_column]
+        self.board[from_row][from_column] = 0
+
+    def can_move(self, row: int, column: int, movement: CCMovement):
+        """
+        True if the player can move in this direction from the row and 
+        column. Note: doesn't check if row, column are within bounds.
+        """
+        dest_row, dest_column = self._dest_position(row, column, movement)
+        if not self.within_bounds(dest_row, dest_column):
+            return False
+        if self.board[dest_row][dest_column] != 0:
+            # only allowed if we can jump this piece
+            return self._can_jump(row, column, movement)
+        else:
+            return not self.player_can_only_jump
 
     def move(self, row: int, column: int, movement: CCMovement):
         """
@@ -224,7 +253,8 @@ class CCGame:
         _hash = 2 ^ 16
         for row in range(0, len(self.board)):
             for column in range(0, len(self.board[row])):
-                _hash ^= hash(self.board[row][column])
+                _hash ^= (row + 1) * (column + 1) * \
+                    hash(self.board[row][column])
         return _hash ^ hash(self.player_turn)
 
     def __eq__(self, other):

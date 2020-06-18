@@ -1,13 +1,7 @@
-from copy import deepcopy
-
 from chinese_checkers.cc_reasoner import CCReasoner
 from chinese_checkers.cc_game import CCGame
 from chinese_checkers.cc_heuristics import combined_vertical_advance
 
-
-"""
-TODO Optimize this by avoiding deep copies
-"""
 
 class GreedyStrategy(CCReasoner):
 
@@ -43,23 +37,22 @@ class GreedyStrategy(CCReasoner):
         maximizing = depth % 2 == 0
         best_score = -100000 if maximizing else 100000
 
-        for _, move in enumerate(moves.values()):
-            m_game = deepcopy(game)
+        for move in moves:
             if not best_move:
                 best_move = move
 
-            m_game.apply_move_sequence(move)
-            if m_game.player_turn == player:
+            game.apply_move_sequence(move)
+            if game.player_turn == player:
                 # if we have been jumping, finish the movement
-                m_game.rotate_turn()
+                game.rotate_turn()
 
             # check if game has already ended
-            if m_game.state() == 1:
+            if game.state() == 1:
                 # player 1 wins
                 curr_score = 100000 if player == 1 else -100000
                 if not maximizing:
                     curr_score = -curr_score
-            elif m_game.state() == 2:
+            elif game.state() == 2:
                 # player 2 wins
                 curr_score = -100000 if player == 1 else 100000
                 if not maximizing:
@@ -70,16 +63,16 @@ class GreedyStrategy(CCReasoner):
                         # approximate the score of the game by
                         # subtracting heuristics
                         curr_score = (
-                            self.heuristic(m_game, 1) -
-                            self.heuristic(m_game, 2)
+                            self.heuristic(game, 1) -
+                            self.heuristic(game, 2)
                         )
                     else:
                         curr_score = (
-                            self.heuristic(m_game, 2) -
-                            self.heuristic(m_game, 1)
+                            self.heuristic(game, 2) -
+                            self.heuristic(game, 1)
                         )
                 else:
-                    curr_score = self._select_move(m_game,
+                    curr_score = self._select_move(game,
                                                    2 if player == 1 else 1,
                                                    depth + 1,
                                                    alpha, beta)[1]
@@ -94,6 +87,11 @@ class GreedyStrategy(CCReasoner):
                     # prefer shorter moves
                     best_move = move
 
+            # undo movement
+            for _ in range(0, len(move[1])):
+                game.undo_last_move()
+            game.rotate_turn()
+
             # perform alpha-beta pruning
             if self.alpha_beta_pruning:
                 if maximizing:
@@ -101,7 +99,7 @@ class GreedyStrategy(CCReasoner):
                 else:
                     beta = min(beta, best_score)
                 if beta <= alpha:
-                    # alpha pruning
+                    # alpha/beta pruning
                     return (best_move, best_score)
 
         return (best_move, best_score)
