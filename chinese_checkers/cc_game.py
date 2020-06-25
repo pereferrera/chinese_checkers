@@ -209,12 +209,20 @@ class CCGame:
         jumping). move_sequence is a tuple:
          - 0: list of positions the move sequence will traverse
          - 1: list of CCMovement directions the move sequence will perform
+        This function automatically rotates the turn if jumps are performed
+        (it is assumed no more movements from the same player will follow).
         """
+        player = self.player_turn
+        
         positions = move_sequence[0]
         directions = move_sequence[1]
         for i, direction in enumerate(directions):
             row, column = positions[i]
             self.move(row, column, direction)
+    
+        if self.player_turn == player:
+            # if we have been jumping, finish the movement
+            self.rotate_turn()
 
     def pretty_print_board(self):
         for i in range(0, len(self.board)):

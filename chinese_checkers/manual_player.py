@@ -27,8 +27,6 @@ class ManualPlayer(CCReasoner):
         for move in available_moves:
             c_game = deepcopy(game)
             c_game.apply_move_sequence(move)
-            if c_game.player_turn == player:
-                c_game.rotate_turn()
             if c_game == m_game:
                 return True
         return False

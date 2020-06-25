@@ -5,16 +5,17 @@ TODO Make an interface for heuristics so it's clearer what we need to
 provide to strategies
 
 Reminder: heuristics here are to be maximized, not minimized
-They all return a value between 0 and 1, but still need to be normalized
 """
 
 
-def combined_heuristic(game: CCGame, player: int):
+def combined_heuristic(game: CCGame, player: int, weights: list=[0.1,
+                                                                 0.899,
+                                                                 0.001]):
     # rough normalization to combine different heuristics
     return (
-        inv_squared_sum_dest_corner(game, player) +
-        10 * combined_vertical_advance(game, player) +
-        0.01 * inv_squared_sum_center_line(game, player)
+        weights[0] * inv_squared_sum_dest_corner(game, player) +
+        weights[1] * combined_vertical_advance(game, player) +
+        weights[2] * inv_squared_sum_center_line(game, player)
     )
 
 
@@ -58,6 +59,8 @@ def inv_squared_sum_center_line(game: CCGame, player: int):
                 dist = abs(column - center)
                 squared_sum += (dist * dist)
 
+    if squared_sum == 0:
+        return 1
     return min(1, 1 / squared_sum)
 
 

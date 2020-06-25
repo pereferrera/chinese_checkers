@@ -1,14 +1,21 @@
+from queue import PriorityQueue
+
 from chinese_checkers.cc_reasoner import CCReasoner
 from chinese_checkers.cc_game import CCGame
 from chinese_checkers.cc_heuristics import combined_vertical_advance
 
 
-class GreedyStrategy(CCReasoner):
+class MinMaxStrategy(CCReasoner):
 
     def __init__(self, steps=1, alpha_beta_pruning=True,
+                 pre_sort_moves=False,
                  heuristic=combined_vertical_advance):
         self.steps = steps
         self.alpha_beta_pruning = alpha_beta_pruning
+        self.pre_sort_moves = pre_sort_moves
+        if self.pre_sort_moves and not self.alpha_beta_pruning:
+            raise ValueError("""
+                Invalid config: pre-sort moves without alpha beta pruning""")
         self.heuristic = heuristic
 
     def _select_move(self,
@@ -33,18 +40,28 @@ class GreedyStrategy(CCReasoner):
                 a software bug
             """)
 
+        moves_queue = PriorityQueue()
+        for move in moves:
+            priority = 1
+            if self.pre_sort_moves:
+                game.apply_move_sequence(move)
+                priority = -self.heuristic(game, player)
+                # undo movement
+                for _ in range(0, len(move[1])):
+                    game.undo_last_move()
+                game.rotate_turn()
+            moves_queue.put((priority, move))
+
         best_move = None
         maximizing = depth % 2 == 0
         best_score = -100000 if maximizing else 100000
 
-        for move in moves:
+        while not moves_queue.empty():
+            move = moves_queue.get()[1]
             if not best_move:
                 best_move = move
 
             game.apply_move_sequence(move)
-            if game.player_turn == player:
-                # if we have been jumping, finish the movement
-                game.rotate_turn()
 
             # check if game has already ended
             if game.state() == 1:
@@ -59,18 +76,12 @@ class GreedyStrategy(CCReasoner):
                     curr_score = -curr_score
             else:
                 if depth == self.steps * 2:  # maximizing
-                    if player == 1:
                         # approximate the score of the game by
                         # subtracting heuristics
-                        curr_score = (
-                            self.heuristic(game, 1) -
-                            self.heuristic(game, 2)
-                        )
-                    else:
-                        curr_score = (
-                            self.heuristic(game, 2) -
-                            self.heuristic(game, 1)
-                        )
+                    curr_score = (
+                        self.heuristic(game, player) -
+                        self.heuristic(game, 2 if player == 1 else 1)
+                    )
                 else:
                     curr_score = self._select_move(game,
                                                    2 if player == 1 else 1,
