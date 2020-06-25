@@ -8,9 +8,10 @@ Reminder: heuristics here are to be maximized, not minimized
 """
 
 
-def combined_heuristic(game: CCGame, player: int, weights: list=[0.1,
-                                                                 0.899,
-                                                                 0.001]):
+def combined_heuristic(game: CCGame, player: int,
+                       weights: list=[0.43911791020540286,
+                                      0.5428449057332061,
+                                      0.01803718406139114]):
     # rough normalization to combine different heuristics
     return (
         weights[0] * inv_squared_sum_dest_corner(game, player) +
