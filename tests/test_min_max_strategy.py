@@ -18,7 +18,7 @@ class TestMinMaxStrategy(unittest.TestCase):
         strategy = MinMaxStrategy(alpha_beta_pruning=False)
 
         move, score = strategy._select_move(game, 1, 0, -100000, 100000)
-        self.assertEqual(100000, score)
+        self.assertTrue(score > 1000)
         game.apply_move_sequence(move)
 
         game.rotate_turn()
@@ -60,13 +60,13 @@ class TestMinMaxStrategy(unittest.TestCase):
         game.rotate_turn()
 
         move, score = strategy._select_move(game, 2, 0, -100000, 100000)
-        self.assertEqual(100000, score)
+        self.assertTrue(score > 1000)
         game.apply_move_sequence(move)
 
         game.rotate_turn()
 
         move, score = strategy_0._select_move(game, 2, 0, -100000, 100000)
-        self.assertEqual(100000, score)
+        self.assertTrue(score > 1000)
 
         game.apply_move_sequence(move)
         self.assertEqual(2, game.state())

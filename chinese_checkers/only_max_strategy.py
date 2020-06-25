@@ -45,12 +45,18 @@ class OnlyMaxStrategy(CCReasoner):
             # check if game has already ended
             if game.state() == 1:
                 # player 1 wins
-                curr_score = 100000 if self.player == 1 else -100000
+                # prefer winning in as few steps as possible
+                curr_score = (
+                    100000/(depth + 1) if self.player == 1 else -100000
+                )
             elif game.state() == 2:
                 # player 2 wins
-                curr_score = -100000 if self.player == 1 else 100000
+                # prefer winning in as few steps as possible
+                curr_score = (
+                    -100000 if self.player == 1 else 100000/(depth + 1)
+                )
             else:
-                if depth == self.steps * 2:
+                if depth == self.steps:
                     curr_score = self.heuristic(game, self.player)
                 else:
                     curr_score = self._select_move(game,

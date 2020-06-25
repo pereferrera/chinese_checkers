@@ -66,12 +66,18 @@ class MinMaxStrategy(CCReasoner):
             # check if game has already ended
             if game.state() == 1:
                 # player 1 wins
-                curr_score = 100000 if player == 1 else -100000
+                # prefer winning in as few steps as possible
+                curr_score = (
+                    100000/(depth + 1) if player == 1 else -100000
+                )
                 if not maximizing:
                     curr_score = -curr_score
             elif game.state() == 2:
                 # player 2 wins
-                curr_score = -100000 if player == 1 else 100000
+                # prefer winning in as few steps as possible
+                curr_score = (
+                    -100000 if player == 1 else 100000/(depth + 1)
+                )
                 if not maximizing:
                     curr_score = -curr_score
             else:
