@@ -1,21 +1,24 @@
+from typing import List
 """
 1 versus 1 chinese checkers
-Representes the board and the state of the game
+Represents the board and the state of the game
 Encodes the rules i.e. it can be used to derive the allowed movements
 and state transitions.
 """
 from chinese_checkers.cc_movement import CCMovement
 from chinese_checkers.exceptions import InvalidMoveException
+from chinese_checkers.game_visitor import GameVisitor
+
+ListOfGameVisitors = List[GameVisitor]
 
 
 class CCGame:
 
-    NORTH_MOVEMENTS = set([CCMovement.LN, CCMovement.RN])
-    SOUTH_MOVEMENTS = set([CCMovement.LS, CCMovement.RS])
     # minimum width of longest row of the board
     MIN_BOARD_WIDTH = 5
 
-    def __init__(self, width: int=5, player_row_spawn=3):
+    def __init__(self, width: int=5, player_row_spawn=3,
+                 visitors: ListOfGameVisitors=[]):
         if width < 5:
             raise ValueError("Longest board row length can't be less than "
                              f"{self.MIN_BOARD_WIDTH}")
@@ -48,6 +51,10 @@ class CCGame:
         self.moved_to_row = []
         self.moved_to_column = []
 
+        self.visitors = visitors
+        for visitor in self.visitors:
+            visitor.on_init_game(self.board)
+
     def within_bounds(self, row: int, column: int):
         """
         True if the position is allowed on this board, False otherwise
@@ -66,9 +73,11 @@ class CCGame:
         dest_row = row
         dest_column = column
 
-        if(movement in self.NORTH_MOVEMENTS):
+        if(movement == CCMovement.LN or
+           movement == CCMovement.RN):
             dest_row -= 1
-        elif(movement in self.SOUTH_MOVEMENTS):
+        elif(movement == CCMovement.LS or
+             movement == CCMovement.RS):
             dest_row += 1
         elif(movement == CCMovement.L):
             dest_column -= 1
@@ -125,12 +134,24 @@ class CCGame:
         self.moved_to_row.append(dest_row)
         self.moved_to_column.append(dest_column)
 
+        for visitor in self.visitors:
+            visitor.on_move(from_row, from_column,
+                            dest_row, dest_column,
+                            self.player_turn)
+
     def undo_last_move(self):
         from_row = self.moved_to_row.pop()
         from_column = self.moved_to_column.pop()
-        self.board[self.moved_row.pop()][self.moved_column.pop()] =\
+        to_row = self.moved_row.pop()
+        to_column = self.moved_column.pop()
+        self.board[to_row][to_column] =\
             self.board[from_row][from_column]
         self.board[from_row][from_column] = 0
+
+        for visitor in self.visitors:
+            visitor.on_move(from_row, from_column,
+                            to_row, to_column,
+                            self.player_turn)
 
     def can_move(self, row: int, column: int, movement: CCMovement):
         """
@@ -213,13 +234,13 @@ class CCGame:
         (it is assumed no more movements from the same player will follow).
         """
         player = self.player_turn
-        
+
         positions = move_sequence[0]
         directions = move_sequence[1]
         for i, direction in enumerate(directions):
             row, column = positions[i]
             self.move(row, column, direction)
-    
+
         if self.player_turn == player:
             # if we have been jumping, finish the movement
             self.rotate_turn()

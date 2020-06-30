@@ -6,8 +6,10 @@ from constants import (
     TEST_BOARD_STRATEGY_PLAYER_1_WINS_IN_TWO,
     TEST_BOARD_STRATEGY_PLAYER_2_WINS_IN_TWO,
     TEST_BOARD_STRATEGY_PLAYER_1_WINS_IN_ONE,
-    TEST_BOARD_STRATEGY_PLAYER_2_WINS_IN_ONE
-)
+    TEST_BOARD_STRATEGY_PLAYER_2_WINS_IN_ONE,
+    TEST_BOARD_VA_1_1,
+    TEST_BOARD_VA_2_2,
+    TEST_BOARD_END_GAME)
 
 
 class TestMinMaxStrategy(unittest.TestCase):
@@ -70,3 +72,21 @@ class TestMinMaxStrategy(unittest.TestCase):
 
         game.apply_move_sequence(move)
         self.assertEqual(2, game.state())
+        
+    def test_use_only_max_beginning_game(self):
+        game = CCGame(width=5, player_row_spawn=3)
+        game.board = TEST_BOARD_VA_2_2
+        strat = MinMaxStrategy(steps=0, alpha_beta_pruning=False)
+        self.assertTrue(strat._use_only_max(game))
+
+    def test_use_only_max_end_game(self):
+        game = CCGame(width=5, player_row_spawn=2)
+        game.board = TEST_BOARD_END_GAME
+        strat = MinMaxStrategy(steps=0, alpha_beta_pruning=False)
+        self.assertTrue(strat._use_only_max(game))
+
+    def test_use_only_max_false(self):
+        game = CCGame(width=5, player_row_spawn=3)
+        game.board = TEST_BOARD_VA_1_1
+        strat = MinMaxStrategy(steps=0, alpha_beta_pruning=False)
+        self.assertFalse(strat._use_only_max(game))

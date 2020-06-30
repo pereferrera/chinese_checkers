@@ -1,5 +1,4 @@
 from copy import deepcopy
-from functools import partial
 import itertools
 import random
 from collections import Counter
@@ -7,8 +6,8 @@ from collections import Counter
 from chinese_checkers.cc_game import CCGame
 
 import numpy as np
-from chinese_checkers.cc_heuristics import combined_heuristic
 from chinese_checkers.min_max_strategy import MinMaxStrategy
+from chinese_checkers.cc_heuristics import CombinedHeuristic
 
 """
 Explorations on finding optimal weights for the combined heuristic
@@ -25,7 +24,7 @@ if __name__ == "__main__":
     SELECT_BEST = 4
     COMPETE_AGAINST = 3
     GAME_WIDTH = 9
-    PLAYER_ROW_SPAWN = 3
+    PLAYER_ROW_SPAWN = 4
 
     def random_individual():
         """
@@ -40,10 +39,8 @@ if __name__ == "__main__":
         """
         print('{} versus {}'.format(weights_1, weights_2))
         game = CCGame(width=GAME_WIDTH, player_row_spawn=PLAYER_ROW_SPAWN)
-        heuristic_1 = partial(combined_heuristic,
-                              weights=weights_1)
-        heuristic_2 = partial(combined_heuristic,
-                              weights=weights_2)
+        heuristic_1 = CombinedHeuristic(weights_1)
+        heuristic_2 = CombinedHeuristic(weights_2)
 
         strategy_1 = MinMaxStrategy(
             steps=LOOK_AHEAD, pre_sort_moves=True,
@@ -89,10 +86,12 @@ if __name__ == "__main__":
         """
         n_generations = 0
 
+        generation = [random_individual()
+                      for i in range(0, GENERATION_SIZE)]
+
         while True:
             print(f'Generation {n_generations}')
-            generation = [random_individual()
-                          for i in range(0, GENERATION_SIZE)]
+
             scores = Counter()
             played_against = {}
 
@@ -130,7 +129,7 @@ if __name__ == "__main__":
             next_generation = [generation[b] for b in best]
 
             # fill with offspring from the best candidates
-            for pair in itertools.permutations(best, 2):
+            for pair in itertools.combinations(best, 2):
                 next_generation.append(
                     crossover_avg(generation[pair[0]],
                                   generation[pair[1]]))
@@ -148,9 +147,13 @@ if __name__ == "__main__":
             generation = next_generation
             n_generations += 1
 
-#    genetic_search()
+    genetic_search()
+
 #    compete([0.43911791020540286, 0.5428449057332061, 0.01803718406139114],
 #            [0.1, 0.899, 0.001])
 
-    compete([0.43911791020540286, 0.5428449057332061, 0.01803718406139114],
-            [0.040261152062418745, 0.931160364509321, 0.02857848342826011])
+#    compete([0.43911791020540286, 0.5428449057332061, 0.01803718406139114],
+#            [0.040261152062418745, 0.931160364509321, 0.02857848342826011])
+
+#    compete([0.040261152062418745, 0.931160364509321, 0.02857848342826011],
+#            [0.0, 1.0, 0.0])

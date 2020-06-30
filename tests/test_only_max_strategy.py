@@ -6,6 +6,7 @@ from constants import (
     TEST_BOARD_STRATEGY_PLAYER_1_WINS_IN_TWO,
     TEST_BOARD_STRATEGY_PLAYER_2_WINS_IN_TWO,
 )
+from chinese_checkers.cc_heuristics import CombinedVerticalAdvance
 
 
 class TestOnlyMaxStrategy(unittest.TestCase):
@@ -13,7 +14,8 @@ class TestOnlyMaxStrategy(unittest.TestCase):
     def test_player_1_wins(self):
         game = CCGame(width=5, player_row_spawn=3)
         game.board = TEST_BOARD_STRATEGY_PLAYER_1_WINS_IN_TWO
-        strategy = OnlyMaxStrategy(steps=1, player=1)
+        strategy = OnlyMaxStrategy(steps=1, player=1,
+                                   heuristic=CombinedVerticalAdvance())
 
         move, score = strategy._select_move(game, 0)
         self.assertEqual(50000, score)
@@ -30,7 +32,8 @@ class TestOnlyMaxStrategy(unittest.TestCase):
     def test_player_2_wins(self):
         game = CCGame(width=5, player_row_spawn=3)
         game.board = TEST_BOARD_STRATEGY_PLAYER_2_WINS_IN_TWO
-        strategy = OnlyMaxStrategy(steps=1, player=2)
+        strategy = OnlyMaxStrategy(steps=1, player=2,
+                                   heuristic=CombinedVerticalAdvance())
 
         game.rotate_turn()
 
