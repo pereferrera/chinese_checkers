@@ -12,8 +12,6 @@ from chinese_checkers.cc_heuristics import CombinedHeuristic
 """
 Explorations on finding optimal weights for the combined heuristic
 in cc_heuristics using a genetic algorithm-oriented approach.
-
-TODO: Validate some of the code here through unit tests.
 """
 if __name__ == "__main__":
     random.seed(1)
@@ -81,7 +79,7 @@ if __name__ == "__main__":
 
     def genetic_search():
         """
-        Genetic search of optimal weights, right now implemented as an 
+        Genetic search of optimal weights, right now implemented as an
         infinite loop (results to be gathered via stdout).
         """
         n_generations = 0

@@ -13,16 +13,18 @@ from chinese_checkers.oc_heuristic import OptimizedCombinedHeuristic
 if __name__ == "__main__":
     random.seed(1)
 
-    heuristic = OptimizedCombinedHeuristic()
-    game = CCGame(width=9, player_row_spawn=4, visitors=[heuristic])
+    oc_heuristic = OptimizedCombinedHeuristic()
+
+    game = CCGame(width=9, player_row_spawn=4, visitors=[oc_heuristic])
 
 #    manual_players = set([2])
     manual_players = set()
 
-
     ai_players = {
-        1: MinMaxStrategy(steps=1, pre_sort_moves=True, heuristic=heuristic),
-        2: MinMaxStrategy(steps=1, pre_sort_moves=True, heuristic=heuristic)
+        1: MinMaxStrategy(steps=1, pre_sort_moves=True,
+                          heuristic=oc_heuristic),
+        2: MinMaxStrategy(steps=2, pre_sort_moves=True,
+                          extra_prunning=True, heuristic=oc_heuristic),
     }
 
     start = time.time()
@@ -52,6 +54,8 @@ if __name__ == "__main__":
             ai_players_perf[player_turn].append(end - start)
             print(f'Move sequence: {move}')
             print(f'{stats.describe(ai_players_perf[player_turn])}')
+            print(f'{oc_heuristic.value(game, 1)} -'
+                  f'{oc_heuristic.value(game, 2)}')
             game.apply_move_sequence(move)
         else:
             print("It's manual's player turn!")

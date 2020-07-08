@@ -1,10 +1,6 @@
 from chinese_checkers.cc_heuristic import CCHeuristic
 from chinese_checkers.cc_game import CCGame
 
-"""
-Reminder: heuristics here are to be maximized, not minimized
-"""
-
 
 class CombinedHeuristic(CCHeuristic):
 
@@ -52,8 +48,8 @@ class InvSquaredSumCenterLine(CCHeuristic):
         Returns:
         -------
         float
-            The inverse squared sum of the distances of all pieces from this player
-            to the center line.
+            The inverse squared sum of the distances of all pieces
+            from this player to the center line.
         """
         squared_sum = 0
 
@@ -78,8 +74,8 @@ class InvSquaredSumDestCorner(CCHeuristic):
         Returns:
         -------
         float
-            The inverse squared sum of the distances of all pieces from this player
-            to its destiny corner (0,0) or (n,0).
+            The inverse squared sum of the distances of all pieces
+            from this player to its destiny corner (0,0) or (n,0).
         """
         squared_sum = 0
 

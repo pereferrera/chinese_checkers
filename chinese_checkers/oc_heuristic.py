@@ -80,6 +80,7 @@ class OptimizedCombinedHeuristic(GameVisitor, CCHeuristic):
         """
         vals = self.value_1 if player == 1 else self.value_2
         a = self.weights[0] * (1 if vals[0] == 0 else min(1, 1 / vals[0]))
+        assert vals[1] < (self.heigth * self.pieces)
         b = self.weights[1] * (vals[1] / (self.heigth * self.pieces))
         c = self.weights[2] * (1 if vals[2] == 0 else min(1, 1 / vals[2]))
         return (a + b + c)

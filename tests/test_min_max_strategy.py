@@ -72,7 +72,7 @@ class TestMinMaxStrategy(unittest.TestCase):
 
         game.apply_move_sequence(move)
         self.assertEqual(2, game.state())
-        
+
     def test_use_only_max_beginning_game(self):
         game = CCGame(width=5, player_row_spawn=3)
         game.board = TEST_BOARD_VA_2_2
@@ -90,3 +90,38 @@ class TestMinMaxStrategy(unittest.TestCase):
         game.board = TEST_BOARD_VA_1_1
         strat = MinMaxStrategy(steps=0, alpha_beta_pruning=False)
         self.assertFalse(strat._use_only_max(game))
+
+    def test_alpha_beta_prunning(self):
+        """assert that using alpha-beta prunning doesn't alter
+        the choice of movements"""
+        game = CCGame(width=5, player_row_spawn=3)
+        strat_ab = MinMaxStrategy(steps=1, alpha_beta_pruning=True)
+        strat_no_ab = MinMaxStrategy(steps=1, alpha_beta_pruning=False)
+
+        N_STEPS = 10
+
+        for _ in range(0, N_STEPS):
+            m_ab = strat_ab.select_move(game, game.player_turn)
+            m_no_ab = strat_no_ab.select_move(game, game.player_turn)
+
+            self.assertEqual(m_ab, m_no_ab)
+            game.apply_move_sequence(m_ab)
+
+    def test_transposition_table(self):
+        """assert that using a transposition table doesn't alter
+        the choice of movements"""
+        game = CCGame(width=5, player_row_spawn=3)
+        strat_tt = MinMaxStrategy(steps=1, alpha_beta_pruning=False,
+                                  transposition_table=True)
+        strat_no_tt = MinMaxStrategy(steps=1, alpha_beta_pruning=False,
+                                     transposition_table=False)
+
+        N_STEPS = 10
+
+        for _ in range(0, N_STEPS):
+            m_tt = strat_tt.select_move(game, game.player_turn)
+            m_no_tt = strat_no_tt.select_move(game, game.player_turn)
+
+            self.assertEqual(m_tt, m_no_tt)
+
+            game.apply_move_sequence(m_tt)

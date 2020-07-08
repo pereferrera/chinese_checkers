@@ -19,12 +19,12 @@ class CCReasoner():
         jumping = game.player_can_only_jump
 
         def undo_movement():
+            if game.player_turn != player:
+                game.rotate_turn()
             game.undo_last_move()
             if not jumping and game.player_can_only_jump:
                 # reset jumping state
                 game.player_can_only_jump = False
-            if game.player_turn != player:
-                game.rotate_turn()
 
         for movement in CCMovement:
             if game.can_move(row, column, movement):
@@ -61,7 +61,7 @@ class CCReasoner():
         The value sequence is made of pairs in which:
         - position 0: contains the list of board positions that the piece
             can traverse
-        - position 1: contains the list of CCMovement directions that the 
+        - position 1: contains the list of CCMovement directions that the
             piece can apply in order to follow the traversed path
         """
         if player != game.player_turn:

@@ -11,7 +11,6 @@ class GameVisitor(metaclass=abc.ABCMeta):
                 callable(subclass.on_init_game) or
                 NotImplemented)
 
-
     @abc.abstractmethod
     def on_init_game(self,
                      board: list):

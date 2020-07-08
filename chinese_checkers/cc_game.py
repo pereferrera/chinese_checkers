@@ -1,10 +1,4 @@
 from typing import List
-"""
-1 versus 1 chinese checkers
-Represents the board and the state of the game
-Encodes the rules i.e. it can be used to derive the allowed movements
-and state transitions.
-"""
 from chinese_checkers.cc_movement import CCMovement
 from chinese_checkers.exceptions import InvalidMoveException
 from chinese_checkers.game_visitor import GameVisitor
@@ -13,6 +7,12 @@ ListOfGameVisitors = List[GameVisitor]
 
 
 class CCGame:
+    """
+    1 versus 1 chinese checkers
+    Represents the board and the state of the game
+    Encodes the rules i.e. it can be used to derive the allowed movements
+    and state transitions.
+    """
 
     # minimum width of longest row of the board
     MIN_BOARD_WIDTH = 5
@@ -35,8 +35,8 @@ class CCGame:
         # rest of board (empty)
         self.board += [[0] * i for i in range(self.player_row_spawn + 1,
                                               width + 1)]
-        self.board += [[0] * i for i in reversed(range(self.player_row_spawn + 1,
-                                                       width))]
+        self.board += [[0] * i for i in reversed(
+            range(self.player_row_spawn + 1, width))]
         # player 2
         self.board += [[2] * i for i in reversed(
             range(1, self.player_row_spawn + 1))]
@@ -155,7 +155,7 @@ class CCGame:
 
     def can_move(self, row: int, column: int, movement: CCMovement):
         """
-        True if the player can move in this direction from the row and 
+        True if the player can move in this direction from the row and
         column. Note: doesn't check if row, column are within bounds.
         """
         dest_row, dest_column = self._dest_position(row, column, movement)
@@ -169,22 +169,23 @@ class CCGame:
 
     def move(self, row: int, column: int, movement: CCMovement):
         """
-        Given a starting position, move the piece according to an 
-        executed direction. If there is a piece traversing the direction 
+        Given a starting position, move the piece according to an
+        executed direction. If there is a piece traversing the direction
         of the movement, jump it. If the movement is invalid, a ValueException
         is raised.
-        
+
         The board is modified and the player turned is rotated. In case
-        the player has jumped a piece, and in case that more jumps are possible,
-        the player turn is not rotated, indicating that the current player
-        can still perform more moves. (Note: the game doesn't enforce yet
-        that the next moves are from the same piece that was moved, but
-        that should be ideally done). 
-        
+        the player has jumped a piece, and in case that more jumps are
+        possible, the player turn is not rotated, indicating that the
+        current player can still perform more moves.
+
+        (Note: the game doesn't enforce yet that the next moves are from the
+        same piece that was moved, but that should be ideally done).
+
         Returns the next player's turn.
-        
+
         @raise ValueError:
-        @raise InvalidMoveException: 
+        @raise InvalidMoveException:
         """
         if not self.within_bounds(row, column):
             raise ValueError('Out of bounds position in the board')

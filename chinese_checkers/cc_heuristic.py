@@ -3,6 +3,9 @@ from chinese_checkers.cc_game import CCGame
 
 
 class CCHeuristic(metaclass=abc.ABCMeta):
+    """
+    Provide a value between 0 and 1, to be maximized (1 is best-looking board)
+    """
 
     @classmethod
     def __subclasshook__(cls, subclass):

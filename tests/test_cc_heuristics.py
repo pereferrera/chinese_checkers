@@ -10,7 +10,7 @@ from constants import (
 )
 from chinese_checkers.cc_movement import CCMovement
 from chinese_checkers.cc_heuristics import CombinedVerticalAdvance,\
-    InvSquaredSumCenterLine, InvSquaredSumDestCorner
+    InvSquaredSumCenterLine, InvSquaredSumDestCorner, CombinedHeuristic
 from chinese_checkers.oc_heuristic import OptimizedCombinedHeuristic
 
 
@@ -71,7 +71,7 @@ class TestCCHeuristics(unittest.TestCase):
                         heuristic.value(game_2, 2))
 
     def test_optimized_combined_heuristic(self):
-        heuristic = CombinedVerticalAdvance()
+        heuristic = CombinedHeuristic()
         optimized_heuristic = OptimizedCombinedHeuristic()
 
         game_1 = CCGame(width=5, visitors=[optimized_heuristic])

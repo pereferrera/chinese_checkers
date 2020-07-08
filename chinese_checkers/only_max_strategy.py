@@ -2,18 +2,27 @@ from chinese_checkers.cc_reasoner import CCReasoner
 from chinese_checkers.cc_game import CCGame
 from chinese_checkers.cc_heuristic import CCHeuristic
 from chinese_checkers.cc_heuristics import CombinedHeuristic
+from chinese_checkers.helpers import CCZobristHash
 
 
 class OnlyMaxStrategy(CCReasoner):
+    """
+    This Strategy is used internally by MinMaxStrategy, it is not supposed
+    to be used standalone.
+    """
 
     def __init__(self,
                  player: int,
                  steps: int=1,
+                 hasher: CCZobristHash=None,
                  heuristic: CCHeuristic=CombinedHeuristic()):
         self.player = player
         self.steps = steps
         self.heuristic = heuristic
-        self.hasher = None
+        # to use transposition tables
+        self.hasher = hasher
+        if self.hasher:
+            self.transposition_table = {}
 
     def _select_move(self,
                      game: CCGame,
@@ -21,25 +30,21 @@ class OnlyMaxStrategy(CCReasoner):
         """
         Returns: tuple
             - position 0: best movement that can be done by the player
-                at this level. Movement is a tuple as per the values in 
-                #CCReasoner.available_moves() 
+                at this level. Movement is a tuple as per the values in
+                #CCReasoner.available_moves()
             - position 1: best heuristic value that can be achieved at this
                 level if following best move.
         """
-        # TODO DRY, Move to common code
-        # Transposition table - TODO Test this properly
         best_move, best_score = (None, -100000)
-#        if self.hasher:
-#            position_hash = self.hasher.get_hash(game)
-#            best_move, best_score, cached_depth = self.transposition_table.get(
-#                position_hash,
-#                (None, -100000, -1))
-#
-#            if best_move and cached_depth == depth:
-#                self.hits += 1
-#                return (best_move, best_score)
-#            else:
-#                self.misses += 1
+        if self.hasher:
+            # transposition table business logic
+            position_hash = self.hasher.get_hash(game)
+            best_move, best_score, cached_depth = self.transposition_table.get(
+                position_hash,
+                (None, -100000, -1))
+
+            if best_move and cached_depth == depth:
+                return (best_move, best_score)
 
         moves = self.available_moves(game, self.player)
         if game.player_turn != self.player:
@@ -89,9 +94,10 @@ class OnlyMaxStrategy(CCReasoner):
             for _ in range(0, len(move[1])):
                 game.undo_last_move()
 
-#        if self.hasher:
-#            self.transposition_table[position_hash] = (best_move, best_score,
-#                                                       depth)
+        if self.hasher:
+            # save into transposition table
+            self.transposition_table[position_hash] = (best_move, best_score,
+                                                       depth)
         return (best_move, best_score)
 
     def select_move(self, game: CCGame):

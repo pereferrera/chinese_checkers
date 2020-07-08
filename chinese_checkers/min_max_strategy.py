@@ -6,12 +6,19 @@ from chinese_checkers.cc_game import CCGame
 from chinese_checkers.only_max_strategy import OnlyMaxStrategy
 from chinese_checkers.cc_heuristic import CCHeuristic
 from chinese_checkers.cc_heuristics import CombinedHeuristic
+from chinese_checkers.helpers import CCZobristHash
 
 
 class MinMaxStrategy(CCReasoner):
+    """
+    Choose the best movement based on building a Min/Max tree
+    Optionally apply alpha-beta pruning and/or transposition table lookup
+    """
 
     def __init__(self, steps: int=1, alpha_beta_pruning: bool=True,
                  pre_sort_moves: bool=False,
+                 extra_prunning: bool=False,
+                 transposition_table: bool=False,
                  heuristic: CCHeuristic=CombinedHeuristic()):
         self.steps = steps
         self.alpha_beta_pruning = alpha_beta_pruning
@@ -20,10 +27,13 @@ class MinMaxStrategy(CCReasoner):
             raise ValueError("""
                 Invalid config: pre-sort moves without alpha beta pruning""")
         self.heuristic = heuristic
+        # TODO must be better named and/or documented
+        self.extra_prunning = extra_prunning
+        self.transposition_table = transposition_table
         self.hasher = None
 
     def _use_only_max(self, game: CCGame):
-        """Returns True if the strategy can avoid running a MinMax and 
+        """Returns True if the strategy can avoid running a MinMax and
         instead a pure maximization strategy can be used, at this point of
         the game. This happens at the beginning and end of the game, when
         teams are separated enough from each other."""
@@ -58,27 +68,24 @@ class MinMaxStrategy(CCReasoner):
         """
         Returns: tuple
             - position 0: best movement that can be done by the player
-                at this level. Movement is a tuple as per the values in 
-                #CCReasoner.available_moves() 
+                at this level. Movement is a tuple as per the values in
+                #CCReasoner.available_moves()
             - position 1: best heuristic value that can be achieved at this
                 level if following best move.
                 Heuristic is negative for player 2 and position for player 1.
         """
-        # TODO Some DRY here, move common code
-#        if self.hasher:
-#            position_hash = self.hasher.get_hash(game)
-#            tt = (
-#                self.transposition_table_1 if player == 1 else
-#                self.transposition_table_2
-#            )
-#            best_move, best_score, cached_depth = (
-#                tt.get(position_hash, (None, -100000, -1))
-#            )
-#            if best_move and cached_depth == depth:
-#                self.hits += 1
-#                return (best_move, best_score)
-#            else:
-#                self.misses += 1
+        if self.hasher:
+            # transposition table business logic
+            position_hash = self.hasher.get_hash(game)
+            tt = (
+                self.transposition_table_1 if player == 1 else
+                self.transposition_table_2
+            )
+            best_move, best_score, cached_depth = (
+                tt.get(position_hash, (None, -100000, -1))
+            )
+            if best_move and cached_depth == depth:
+                return (best_move, best_score)
 
         moves = self.available_moves(game, player)
         if game.player_turn != player:
@@ -91,12 +98,21 @@ class MinMaxStrategy(CCReasoner):
         for move in moves:
             priority = 1
             if self.pre_sort_moves:
-                game.apply_move_sequence(move)
-                priority = -self.heuristic.value(game, player)
-                # undo movement
-                for _ in range(0, len(move[1])):
-                    game.undo_last_move()
-                game.rotate_turn()
+                vertical_advance = (
+                    move[0][-1][0] - move[0][0][0] if player == 1 else
+                    move[0][0][0] - move[0][-1][0]
+                )
+
+                if(self.extra_prunning
+                   and vertical_advance <= 0
+                   and depth >= 3):
+                    # prune movements down the tree which don't bring any
+                    # extra vertical advance
+                    continue
+
+                # otherwise sort movements by vertical advance to maximize
+                # alpha-beta pruning
+                priority = -vertical_advance
             moves_queue.put((priority, move))
 
         best_move = None
@@ -146,15 +162,12 @@ class MinMaxStrategy(CCReasoner):
                (not maximizing and curr_score < best_score)):
                 best_score = curr_score
                 best_move = move
-            elif(curr_score == best_score):
-                if len(move[0]) < len(best_move[0]):
-                    # prefer shorter moves
-                    best_move = move
 
             # undo movement
+            if game.player_turn != player:
+                game.rotate_turn()
             for _ in range(0, len(move[1])):
                 game.undo_last_move()
-            game.rotate_turn()
 
             # perform alpha-beta pruning
             if self.alpha_beta_pruning:
@@ -166,27 +179,25 @@ class MinMaxStrategy(CCReasoner):
                     # alpha/beta pruning
                     return (best_move, best_score)
 
-#        if self.hasher:
-#            tt[position_hash] = (best_move, best_score, depth)
+        if self.hasher:
+            # save into transposition table
+            tt[position_hash] = (best_move, best_score, depth)
         return (best_move, best_score)
 
     def select_move(self, game: CCGame, player: int):
-        #        self.transposition_table_1 = {}
-        #        self.transposition_table_2 = {}
-        #        self.hasher = CCZobristHash(game)
-        #        self.hits = 0
-        #        self.misses = 0
+        if self.transposition_table:
+            # initialize transposition tables on every turn
+            self.transposition_table_1 = {}
+            self.transposition_table_2 = {}
+            if not self.hasher:
+                # initialize hasher (only once for each game instance)
+                self.hasher = CCZobristHash(game)
         if self._use_only_max(game):
-            only_max = OnlyMaxStrategy(player, self.steps,
+            only_max = OnlyMaxStrategy(player,
+                                       self.steps,
+                                       hasher=self.hasher,
                                        heuristic=self.heuristic)
-            # TODO DRY, UGLY
-#            only_max.transposition_table = {}
-#            only_max.hasher = self.hasher
-#            only_max.hits = 0
-#            only_max.misses = 0
             move, _ = only_max._select_move(game, 0)
-#            print(f'{only_max.hits} hits, {only_max.misses} misses')
         else:
             move, _ = self._select_move(game, player, 0, -100000, 100000)
-#            print(f'{self.hits} hits, {self.misses} misses')
         return move
