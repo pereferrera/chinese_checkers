@@ -1,8 +1,8 @@
 from copy import deepcopy
 
 from chinese_checkers.pygame_gui import PygameGUI
-from chinese_checkers.cc_game import CCGame
-from chinese_checkers.cc_reasoner import CCReasoner
+from chinese_checkers.game import CCGame
+from chinese_checkers.reasoner import CCReasoner
 
 
 class ManualPlayer(CCReasoner):

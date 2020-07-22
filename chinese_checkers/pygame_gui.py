@@ -1,6 +1,11 @@
 import pygame
 
-from chinese_checkers.cc_game import CCGame
+from chinese_checkers.game import CCGame
+
+
+"""
+Graphical interface for playing against the AI
+"""
 
 
 class PygameGUI():
@@ -34,11 +39,14 @@ class PygameGUI():
         column = int((x - (self.game.width -
                            len(self.game.board[row])) *
                       (self.BLOCK_SIZE / 2)) / self.BLOCK_SIZE)
-        print('{} {}'.format(row, column))
         if not self.first_click:
             self.first_click = (row, column)
-        elif not self.second_click and (row, column) != self.first_click:
-            self.second_click = (row, column)
+        elif not self.second_click:
+            if (row, column) != self.first_click:
+                self.second_click = (row, column)
+            else:
+                print('Invalid move input, try again')
+                self.reset_user_input()
 
     def update(self):
         if self.exit_gui:

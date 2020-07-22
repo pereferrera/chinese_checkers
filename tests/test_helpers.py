@@ -1,7 +1,7 @@
 import unittest
 from chinese_checkers.helpers import CCZobristHash
-from chinese_checkers.cc_game import CCGame
-from chinese_checkers.cc_movement import CCMovement
+from chinese_checkers.game import CCGame
+from chinese_checkers.movement import CCMovement
 
 class TestCCGame(unittest.TestCase):
 

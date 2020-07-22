@@ -1,21 +1,24 @@
+from typing import Tuple, Dict, Optional
 from queue import PriorityQueue
 
 
-from chinese_checkers.cc_reasoner import CCReasoner
-from chinese_checkers.cc_game import CCGame
+from chinese_checkers.game import CCGame
 from chinese_checkers.only_max_strategy import OnlyMaxStrategy
-from chinese_checkers.cc_heuristic import CCHeuristic
-from chinese_checkers.cc_heuristics import CombinedHeuristic
+from chinese_checkers.heuristic import CCHeuristic
+from chinese_checkers.heuristics import CombinedHeuristic
 from chinese_checkers.helpers import CCZobristHash
+from chinese_checkers.move import CCMove, PrioritizedCCMove
+from chinese_checkers.strategy import CCStrategy
 
 
-class MinMaxStrategy(CCReasoner):
+class MinMaxStrategy(CCStrategy):
     """
     Choose the best movement based on building a Min/Max tree
     Optionally apply alpha-beta pruning and/or transposition table lookup
     """
 
-    def __init__(self, steps: int=1, alpha_beta_pruning: bool=True,
+    def __init__(self, steps: int=1,
+                 alpha_beta_pruning: bool=True,
                  pre_sort_moves: bool=False,
                  extra_prunning: bool=False,
                  transposition_table: bool=False,
@@ -30,7 +33,7 @@ class MinMaxStrategy(CCReasoner):
         # TODO must be better named and/or documented
         self.extra_prunning = extra_prunning
         self.transposition_table = transposition_table
-        self.hasher = None
+        self.hasher: Optional[CCZobristHash] = None
 
     def _use_only_max(self, game: CCGame):
         """Returns True if the strategy can avoid running a MinMax and
@@ -63,13 +66,12 @@ class MinMaxStrategy(CCReasoner):
                      game: CCGame,
                      player: int,
                      depth: int,
-                     alpha: int,
-                     beta: int):
+                     alpha: float,
+                     beta: float) -> Tuple[CCMove, float]:
         """
         Returns: tuple
-            - position 0: best movement that can be done by the player
-                at this level. Movement is a tuple as per the values in
-                #CCReasoner.available_moves()
+            - position 0: best movem that can be done by the player
+                at this level.
             - position 1: best heuristic value that can be achieved at this
                 level if following best move.
                 Heuristic is negative for player 2 and position for player 1.
@@ -95,32 +97,34 @@ class MinMaxStrategy(CCReasoner):
             """)
 
         moves_queue = PriorityQueue()
+
         for move in moves:
             priority = 1
+            positions = move.board_positions
             if self.pre_sort_moves:
-                vertical_advance = (
-                    move[0][-1][0] - move[0][0][0] if player == 1 else
-                    move[0][0][0] - move[0][-1][0]
+                advance = (
+                    positions[-1][0] - positions[0][0] if player == 1 else
+                    positions[0][0] - positions[-1][0]
                 )
 
                 if(self.extra_prunning
-                   and vertical_advance <= 0
+                   and advance <= 0
                    and depth >= 3):
                     # prune movements down the tree which don't bring any
-                    # extra vertical advance
+                    # extra advance
                     continue
 
                 # otherwise sort movements by vertical advance to maximize
                 # alpha-beta pruning
-                priority = -vertical_advance
-            moves_queue.put((priority, move))
+                priority = -advance
+            moves_queue.put(PrioritizedCCMove(priority, move))
 
         best_move = None
         maximizing = depth % 2 == 0
-        best_score = -100000 if maximizing else 100000
+        best_score = -100000.0 if maximizing else 100000.0
 
         while not moves_queue.empty():
-            move = moves_queue.get()[1]
+            move = moves_queue.get().move
             if not best_move:
                 best_move = move
 
@@ -166,7 +170,7 @@ class MinMaxStrategy(CCReasoner):
             # undo movement
             if game.player_turn != player:
                 game.rotate_turn()
-            for _ in range(0, len(move[1])):
+            for _ in range(0, len(move.directions)):
                 game.undo_last_move()
 
             # perform alpha-beta pruning
@@ -179,25 +183,35 @@ class MinMaxStrategy(CCReasoner):
                     # alpha/beta pruning
                     return (best_move, best_score)
 
-        if self.hasher:
-            # save into transposition table
-            tt[position_hash] = (best_move, best_score, depth)
-        return (best_move, best_score)
+        if best_move:
+            if self.hasher:
+                # save into transposition table
+                tt[position_hash] = (best_move, best_score, depth)
+            return (best_move, best_score)
+        else:
+            raise AssertionError("""
+                No possible movements available, this must be a software bug
+            """)
 
-    def select_move(self, game: CCGame, player: int):
+    def select_move(self, game: CCGame, player: int) -> CCMove:
         if self.transposition_table:
             # initialize transposition tables on every turn
-            self.transposition_table_1 = {}
-            self.transposition_table_2 = {}
+            self.transposition_table_1: Dict[int, Tuple[CCMove, float, int]] =\
+                {}
+            self.transposition_table_2: Dict[int, Tuple[CCMove, float, int]] =\
+                {}
             if not self.hasher:
                 # initialize hasher (only once for each game instance)
                 self.hasher = CCZobristHash(game)
         if self._use_only_max(game):
-            only_max = OnlyMaxStrategy(player,
-                                       self.steps,
-                                       hasher=self.hasher,
-                                       heuristic=self.heuristic)
-            move, _ = only_max._select_move(game, 0)
+            only_max = OnlyMaxStrategy(
+                player,
+                self.steps,
+                transposition_table=self.transposition_table,
+                heuristic=self.heuristic)
+            # reuse hasher instance
+            only_max.hasher = self.hasher
+            move = only_max.select_move(game, player)
         else:
-            move, _ = self._select_move(game, player, 0, -100000, 100000)
+            move, _ = self._select_move(game, player, 0, -100000.0, 100000.0)
         return move

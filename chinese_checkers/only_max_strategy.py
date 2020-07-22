@@ -1,47 +1,49 @@
-from chinese_checkers.cc_reasoner import CCReasoner
-from chinese_checkers.cc_game import CCGame
-from chinese_checkers.cc_heuristic import CCHeuristic
-from chinese_checkers.cc_heuristics import CombinedHeuristic
+from typing import Optional, Dict, Tuple
+
+from chinese_checkers.game import CCGame
+from chinese_checkers.heuristic import CCHeuristic
+from chinese_checkers.heuristics import CombinedHeuristic
 from chinese_checkers.helpers import CCZobristHash
+from chinese_checkers.move import CCMove
+from chinese_checkers.strategy import CCStrategy
 
 
-class OnlyMaxStrategy(CCReasoner):
+class OnlyMaxStrategy(CCStrategy):
     """
-    This Strategy is used internally by MinMaxStrategy, it is not supposed
-    to be used standalone.
+    Strategy that only considers the sequence of movements of the player that
+    is to move. This strategy can be used in situations where the movements of
+    the opponent do not influence the current choice. Therefore it is used
+    internally by MinMaxStrategy
     """
 
     def __init__(self,
                  player: int,
                  steps: int=1,
-                 hasher: CCZobristHash=None,
+                 transposition_table: bool=False,
                  heuristic: CCHeuristic=CombinedHeuristic()):
         self.player = player
         self.steps = steps
         self.heuristic = heuristic
-        # to use transposition tables
-        self.hasher = hasher
-        if self.hasher:
-            self.transposition_table = {}
+        self.use_transposition_table = transposition_table
+        self.hasher: Optional[CCZobristHash] = None
 
     def _select_move(self,
                      game: CCGame,
-                     depth: int):
+                     depth: int) -> Tuple[CCMove, float]:
         """
         Returns: tuple
-            - position 0: best movement that can be done by the player
-                at this level. Movement is a tuple as per the values in
-                #CCReasoner.available_moves()
+            - position 0: best movet that can be done by the player
+                at this level.
             - position 1: best heuristic value that can be achieved at this
                 level if following best move.
         """
-        best_move, best_score = (None, -100000)
-        if self.hasher:
+        best_move, best_score = (None, -100000.0)
+        if self.use_transposition_table and self.hasher:
             # transposition table business logic
             position_hash = self.hasher.get_hash(game)
             best_move, best_score, cached_depth = self.transposition_table.get(
                 position_hash,
-                (None, -100000, -1))
+                (None, -100000.0, -1))
 
             if best_move and cached_depth == depth:
                 return (best_move, best_score)
@@ -85,21 +87,22 @@ class OnlyMaxStrategy(CCReasoner):
             if(curr_score > best_score):
                 best_score = curr_score
                 best_move = move
-            elif(curr_score == best_score):
-                if len(move[0]) < len(best_move[0]):
-                    # prefer shorter moves
-                    best_move = move
 
             # undo movement
-            for _ in range(0, len(move[1])):
+            for _ in range(0, len(move.directions)):
                 game.undo_last_move()
 
-        if self.hasher:
+        if self.hasher and best_move:
             # save into transposition table
             self.transposition_table[position_hash] = (best_move, best_score,
                                                        depth)
         return (best_move, best_score)
 
-    def select_move(self, game: CCGame):
+    def select_move(self, game: CCGame, _: int) -> CCMove:
+        if self.use_transposition_table:
+            self.transposition_table: Dict[int, Tuple[CCMove, float, int]] = {}
+            if not self.hasher:
+                # initialize hasher (only once for each game instance)
+                self.hasher = CCZobristHash(game)
         move, _ = self._select_move(game, 0)
         return move

@@ -1,5 +1,5 @@
 import unittest
-from chinese_checkers.cc_game import CCGame
+from chinese_checkers.game import CCGame
 from chinese_checkers.min_max_strategy import MinMaxStrategy
 
 from constants import (
@@ -15,7 +15,7 @@ from constants import (
 class TestMinMaxStrategy(unittest.TestCase):
 
     def test_player_1_wins(self):
-        game = CCGame(width=5, player_row_spawn=3)
+        game = CCGame(width=5, player_row_span=3)
         game.board = TEST_BOARD_STRATEGY_PLAYER_1_WINS_IN_TWO
         strategy = MinMaxStrategy(alpha_beta_pruning=False)
 
@@ -32,7 +32,7 @@ class TestMinMaxStrategy(unittest.TestCase):
         self.assertEqual(1, game.state())
 
     def test_player_1_wins_in_one(self):
-        game = CCGame(width=5, player_row_spawn=3)
+        game = CCGame(width=5, player_row_span=3)
         game.board = TEST_BOARD_STRATEGY_PLAYER_1_WINS_IN_ONE
         strategy = MinMaxStrategy(steps=0)
 
@@ -42,7 +42,7 @@ class TestMinMaxStrategy(unittest.TestCase):
         self.assertEqual(1, game.state())
 
     def test_player_2_wins_in_one(self):
-        game = CCGame(width=5, player_row_spawn=3)
+        game = CCGame(width=5, player_row_span=3)
         game.board = TEST_BOARD_STRATEGY_PLAYER_2_WINS_IN_ONE
         strategy = MinMaxStrategy(steps=0)
 
@@ -54,7 +54,7 @@ class TestMinMaxStrategy(unittest.TestCase):
         self.assertEqual(2, game.state())
 
     def test_player_2_wins(self):
-        game = CCGame(width=5, player_row_spawn=3)
+        game = CCGame(width=5, player_row_span=3)
         game.board = TEST_BOARD_STRATEGY_PLAYER_2_WINS_IN_TWO
         strategy = MinMaxStrategy(steps=1, alpha_beta_pruning=False)
         strategy_0 = MinMaxStrategy(steps=0, alpha_beta_pruning=False)
@@ -74,19 +74,19 @@ class TestMinMaxStrategy(unittest.TestCase):
         self.assertEqual(2, game.state())
 
     def test_use_only_max_beginning_game(self):
-        game = CCGame(width=5, player_row_spawn=3)
+        game = CCGame(width=5, player_row_span=3)
         game.board = TEST_BOARD_VA_2_2
         strat = MinMaxStrategy(steps=0, alpha_beta_pruning=False)
         self.assertTrue(strat._use_only_max(game))
 
     def test_use_only_max_end_game(self):
-        game = CCGame(width=5, player_row_spawn=2)
+        game = CCGame(width=5, player_row_span=2)
         game.board = TEST_BOARD_END_GAME
         strat = MinMaxStrategy(steps=0, alpha_beta_pruning=False)
         self.assertTrue(strat._use_only_max(game))
 
     def test_use_only_max_false(self):
-        game = CCGame(width=5, player_row_spawn=3)
+        game = CCGame(width=5, player_row_span=3)
         game.board = TEST_BOARD_VA_1_1
         strat = MinMaxStrategy(steps=0, alpha_beta_pruning=False)
         self.assertFalse(strat._use_only_max(game))
@@ -94,7 +94,7 @@ class TestMinMaxStrategy(unittest.TestCase):
     def test_alpha_beta_prunning(self):
         """assert that using alpha-beta prunning doesn't alter
         the choice of movements"""
-        game = CCGame(width=5, player_row_spawn=3)
+        game = CCGame(width=5, player_row_span=3)
         strat_ab = MinMaxStrategy(steps=1, alpha_beta_pruning=True)
         strat_no_ab = MinMaxStrategy(steps=1, alpha_beta_pruning=False)
 
@@ -110,10 +110,12 @@ class TestMinMaxStrategy(unittest.TestCase):
     def test_transposition_table(self):
         """assert that using a transposition table doesn't alter
         the choice of movements"""
-        game = CCGame(width=5, player_row_spawn=3)
-        strat_tt = MinMaxStrategy(steps=1, alpha_beta_pruning=False,
+        game = CCGame(width=5, player_row_span=3)
+        strat_tt = MinMaxStrategy(steps=1,
+                                  alpha_beta_pruning=False,
                                   transposition_table=True)
-        strat_no_tt = MinMaxStrategy(steps=1, alpha_beta_pruning=False,
+        strat_no_tt = MinMaxStrategy(steps=1,
+                                     alpha_beta_pruning=False,
                                      transposition_table=False)
 
         N_STEPS = 10
@@ -121,6 +123,10 @@ class TestMinMaxStrategy(unittest.TestCase):
         for _ in range(0, N_STEPS):
             m_tt = strat_tt.select_move(game, game.player_turn)
             m_no_tt = strat_no_tt.select_move(game, game.player_turn)
+
+            print(m_tt)
+            print(m_no_tt)
+            print('---')
 
             self.assertEqual(m_tt, m_no_tt)
 

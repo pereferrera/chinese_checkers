@@ -1,20 +1,20 @@
-from chinese_checkers.cc_heuristic import CCHeuristic
-from chinese_checkers.cc_game import CCGame
+from chinese_checkers.heuristic import CCHeuristic
+from chinese_checkers.game import CCGame
 
 
 class CombinedHeuristic(CCHeuristic):
 
-    def __init__(self, weights: list=[0.014289242,
-                                      0.965580208,
-                                      0.02013055]):
+    def __init__(self, weights: list=[0.01,
+                                      0.44,
+                                      0.55]):
         self.weights = weights
 
     def value(self, game: CCGame, player: int):
         # rough normalization to combine different heuristics
         return (
-            self.weights[0] * InvSquaredSumDestCorner().value(game, player) +
+            self.weights[0] * InvSquaredSumCenterLine().value(game, player) +
             self.weights[1] * CombinedVerticalAdvance().value(game, player) +
-            self.weights[2] * InvSquaredSumCenterLine().value(game, player)
+            self.weights[2] * InvSquaredSumDestCorner().value(game, player)
         )
 
 
@@ -51,7 +51,7 @@ class InvSquaredSumCenterLine(CCHeuristic):
             The inverse squared sum of the distances of all pieces
             from this player to the center line.
         """
-        squared_sum = 0
+        squared_sum = 0.0
 
         heigth = len(game.board)
 
@@ -63,8 +63,8 @@ class InvSquaredSumCenterLine(CCHeuristic):
                     squared_sum += (dist * dist)
 
         if squared_sum == 0:
-            return 1
-        return min(1, 1 / squared_sum)
+            return 1.0
+        return min(1.0, 1 / squared_sum)
 
 
 class InvSquaredSumDestCorner(CCHeuristic):
@@ -76,15 +76,19 @@ class InvSquaredSumDestCorner(CCHeuristic):
         float
             The inverse squared sum of the distances of all pieces
             from this player to its destiny corner (0,0) or (n,0).
+            This is actually calculated as 1 - the inverse squared sum of
+            distances to the origin such that the gain is bigger at the
+            beginning and smaller as the pieces approach the destiny (to
+            avoid trailing pieces).
         """
         squared_sum = 0
 
         heigth = len(game.board)
-        dest_row = heigth - 1
+        dest_row = 0
         dest_column = 0
 
         if player == 2:
-            dest_row = 0
+            dest_row = heigth - 1
 
         for row in range(0, heigth):
             for column in range(0, len(game.board[row])):
@@ -93,4 +97,4 @@ class InvSquaredSumDestCorner(CCHeuristic):
                                abs(dest_column - column))
                     squared_sum += (dist * dist)
 
-        return min(1, 1 / squared_sum)
+        return 1 - min(1, 1 / squared_sum)

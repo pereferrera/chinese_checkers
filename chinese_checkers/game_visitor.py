@@ -2,6 +2,10 @@ import abc
 
 
 class GameVisitor(metaclass=abc.ABCMeta):
+    """
+    Implements a visitor pattern for classes that need to be aware of
+    the movements that happen during the game (e.g. stateful heuristics).
+    """
 
     @classmethod
     def __subclasshook__(cls, subclass):

@@ -1,15 +1,17 @@
 from typing import List
-from chinese_checkers.cc_movement import CCMovement
+
+from chinese_checkers.movement import CCMovement
 from chinese_checkers.exceptions import InvalidMoveException
 from chinese_checkers.game_visitor import GameVisitor
+from chinese_checkers.move import CCMove
 
 ListOfGameVisitors = List[GameVisitor]
 
 
 class CCGame:
     """
-    1 versus 1 chinese checkers
-    Represents the board and the state of the game
+    1 versus 1 chinese checkers.
+    Represents the board and the state of the game.
     Encodes the rules i.e. it can be used to derive the allowed movements
     and state transitions.
     """
@@ -17,19 +19,21 @@ class CCGame:
     # minimum width of longest row of the board
     MIN_BOARD_WIDTH = 5
 
-    def __init__(self, width: int=5, player_row_spawn=3,
+    def __init__(self,
+                 width: int=5,
+                 player_row_span=3,
                  visitors: ListOfGameVisitors=[]):
         if width < 5:
             raise ValueError("Longest board row length can't be less than "
                              f"{self.MIN_BOARD_WIDTH}")
-        if player_row_spawn > width - 2:
+        if player_row_span > width - 2:
             raise ValueError(
-                "Players' spawn can't be bigger than max width - 2")
+                "Players' span can't be bigger than max width - 2")
 
         self.width = width
-        self.player_row_spawn = player_row_spawn
+        self.player_row_spawn = player_row_span
 
-        self.player_row_spawn = player_row_spawn
+        self.player_row_spawn = player_row_span
         # player 1
         self.board = [[1] * i for i in range(1, self.player_row_spawn + 1)]
         # rest of board (empty)
@@ -46,10 +50,10 @@ class CCGame:
         self.player_turn = 1
         self.player_can_only_jump = False
 
-        self.moved_row = []
-        self.moved_column = []
-        self.moved_to_row = []
-        self.moved_to_column = []
+        self.moved_row: List[int] = []
+        self.moved_column: List[int] = []
+        self.moved_to_row: List[int] = []
+        self.moved_to_column: List[int] = []
 
         self.visitors = visitors
         for visitor in self.visitors:
@@ -123,8 +127,10 @@ class CCGame:
 
     def _do_move(self, from_row: int, from_column: int,
                  dest_row: int, dest_column: int):
-        """Internal method which moves a piece and updates the board.
-        Keeps track of what happened in internal variables."""
+        """
+        Internal method which moves a piece and updates the board.
+        Keeps track of what happened in internal variables.
+        """
         self.board[dest_row][dest_column] = self.board[from_row][from_column]
         self.board[from_row][from_column] = 0
 
@@ -226,7 +232,7 @@ class CCGame:
         self.rotate_turn()
         return self.player_turn
 
-    def apply_move_sequence(self, move_sequence):
+    def apply_move_sequence(self, move_sequence: CCMove):
         """Apply a sequence of possibly more than one move (e.g. by
         jumping). move_sequence is a tuple:
          - 0: list of positions the move sequence will traverse
@@ -236,8 +242,9 @@ class CCGame:
         """
         player = self.player_turn
 
-        positions = move_sequence[0]
-        directions = move_sequence[1]
+        positions = move_sequence.board_positions
+        directions = move_sequence.directions
+
         for i, direction in enumerate(directions):
             row, column = positions[i]
             self.move(row, column, direction)

@@ -1,11 +1,13 @@
 from copy import deepcopy
 import random
 
-from chinese_checkers.cc_game import CCGame
+from chinese_checkers.game import CCGame
 
 
 class CCZobristHash():
     """
+    Stateful Zobrist hasher, used to implement transposition tables.
+
     https://en.wikipedia.org/wiki/Zobrist_hashing
     """
 
@@ -17,7 +19,7 @@ class CCZobristHash():
                 self.table_1[i][j] = random.getrandbits(128)
                 self.table_2[i][j] = random.getrandbits(128)
 
-    def get_hash(self, game: CCGame):
+    def get_hash(self, game: CCGame) -> int:
         hash_ = 0
         for i in range(0, len(game.board)):
             for j in range(0, len(game.board[i])):

@@ -1,18 +1,18 @@
 from chinese_checkers.game_visitor import GameVisitor
-from chinese_checkers.cc_heuristic import CCHeuristic
+from chinese_checkers.heuristic import CCHeuristic
 
 """
 Stateful heuristic made with performance in mind.
-Recalculate the heuristic value for every movement, avoiding repeated
-calculations
+Updates the heuristic value upon every movement, avoiding repeated
+calculations.
 """
 
 
 class OptimizedCombinedHeuristic(GameVisitor, CCHeuristic):
 
-    def __init__(self, weights: list=[0.014289242,
-                                      0.965580208,
-                                      0.02013055]):
+    def __init__(self, weights: list=[0.01,
+                                      0.44,
+                                      0.55]):
         self.weights = weights
 
     def _values_of(self, row: int, column: int, player: int):
@@ -25,9 +25,9 @@ class OptimizedCombinedHeuristic(GameVisitor, CCHeuristic):
         dist_center_sqrd = (dist_center * dist_center)
 
         # inverse squared distance to destination
-        dest_row = self.heigth - 1
+        dest_row = 0
         if player == 2:
-            dest_row = 0
+            dest_row = self.heigth - 1
         dist_dest = max(abs(dest_row - row), column)
         dist_dest_sqrd = dist_dest * dist_dest
 
@@ -82,5 +82,5 @@ class OptimizedCombinedHeuristic(GameVisitor, CCHeuristic):
         a = self.weights[0] * (1 if vals[0] == 0 else min(1, 1 / vals[0]))
         assert vals[1] < (self.heigth * self.pieces)
         b = self.weights[1] * (vals[1] / (self.heigth * self.pieces))
-        c = self.weights[2] * (1 if vals[2] == 0 else min(1, 1 / vals[2]))
+        c = self.weights[2] * (1 if vals[2] == 0 else 1 - min(1, 1 / vals[2]))
         return (a + b + c)

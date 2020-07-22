@@ -1,17 +1,23 @@
-from copy import deepcopy
 import itertools
 import random
+from typing import Set
+from copy import deepcopy
 from collections import Counter
 
-from chinese_checkers.cc_game import CCGame
-
 import numpy as np
+
+from chinese_checkers.game import CCGame
 from chinese_checkers.min_max_strategy import MinMaxStrategy
-from chinese_checkers.cc_heuristics import CombinedHeuristic
+from chinese_checkers.oc_heuristic import OptimizedCombinedHeuristic
+from chinese_checkers.only_max_strategy import OnlyMaxStrategy
 
 """
-Explorations on finding optimal weights for the combined heuristic
-in cc_heuristics using a genetic algorithm-oriented approach.
+Script for finding optimal weights for the combined heuristic
+ using a genetic-inspired search. Random weights are generated which then
+ compete against a greedy strategy based on vertical advance.
+ The ones that win the game in as few movements as possible stay for the
+ next generation. New crossed-over weights are generated as well
+ (offspring).
 """
 if __name__ == "__main__":
     random.seed(1)
@@ -20,9 +26,10 @@ if __name__ == "__main__":
     GENERATION_SIZE = 12
     RANDOM_FILL_SIZE = 4
     SELECT_BEST = 4
-    COMPETE_AGAINST = 3
-    GAME_WIDTH = 9
-    PLAYER_ROW_SPAWN = 4
+    GAME_WIDTH = 7
+    # deliberately small number of pieces to avoid high probability of tie
+    PLAYER_ROW_SPAN = 3
+    MAX_TURNS = 200
 
     def random_individual():
         """
@@ -33,27 +40,40 @@ if __name__ == "__main__":
     def compete(weights_1: list, weights_2: list):
         """
         Plays a game between two AIs with different weights and return
-        the result of the game
+        the result of the game.
+        The second AI is in disadvantage (has a pure greedy lookahead).
+
+        Return the number of turns it took for player 1 to beat player 2,
+        or MAX_TURNS if player 1 didn't manage to beat player 2.
         """
-        print('{} versus {}'.format(weights_1, weights_2))
-        game = CCGame(width=GAME_WIDTH, player_row_spawn=PLAYER_ROW_SPAWN)
-        heuristic_1 = CombinedHeuristic(weights_1)
-        heuristic_2 = CombinedHeuristic(weights_2)
+        print('{} versus greedy {}'.format(weights_1, weights_2))
+
+        heuristic_1 = OptimizedCombinedHeuristic(weights_1)
+        heuristic_2 = OptimizedCombinedHeuristic(weights_2)
+
+        game = CCGame(width=GAME_WIDTH,
+                      player_row_span=PLAYER_ROW_SPAN,
+                      visitors=[heuristic_1, heuristic_2])
 
         strategy_1 = MinMaxStrategy(
             steps=LOOK_AHEAD, pre_sort_moves=True,
+            transposition_table=True,
             heuristic=heuristic_1)
-        strategy_2 = MinMaxStrategy(
-            steps=LOOK_AHEAD, pre_sort_moves=True,
+        strategy_2 = OnlyMaxStrategy(
+            player=2,
+            steps=0,
+            transposition_table=True,
             heuristic=heuristic_2)
 
         turns = 0
 
-        last_boards = set()
+        last_boards: Set[CCGame] = set()
         board_repeats = 0
 
-        while(game.state() == 0):
-            strategy = strategy_1 if game.player_turn == 1 else strategy_2
+        while(game.state() == 0 and turns < MAX_TURNS):
+            strategy = (
+                strategy_1 if game.player_turn == 1 else strategy_2
+            )
             move = strategy.select_move(game, game.player_turn)
             game.apply_move_sequence(move)
             if game in last_boards:
@@ -62,13 +82,18 @@ if __name__ == "__main__":
             if board_repeats == 3:
                 # infinite loop (tie)
                 print('Board repeats - tie')
-                return -1
+                return MAX_TURNS
 
             last_boards.add(deepcopy(game))
             turns += 1
 
-        print(f'{game.state()} wins')
-        return game.state()
+        state = game.state()
+        if state == 1:
+            print(f'Won in {turns} turns.')
+            return min(MAX_TURNS, turns)
+        else:
+            print(f'Failed to beat player 2, game state: {state}')
+            return MAX_TURNS
 
     def crossover_avg(weights_1: list, weights_2: list):
         """
@@ -88,36 +113,13 @@ if __name__ == "__main__":
                       for i in range(0, GENERATION_SIZE)]
 
         while True:
-            print(f'Generation {n_generations}')
+            print(f'Generation {n_generations}: {generation}')
 
             scores = Counter()
-            played_against = {}
 
             for i in range(0, GENERATION_SIZE):
-                # (this doesn't guarantee that everybody will play exactly
-                #  COMPETE_AGAINST matches. There might be more)
-                while len(played_against.get(i, [])) < COMPETE_AGAINST:
-                    adversaries = (list(
-                        set(list(range(0, i)) +
-                            list(range(i + 1, GENERATION_SIZE))) -
-                        set(played_against.get(i, []))
-                    ))
-                    against = random.choice(adversaries)
-
-                    result = compete(generation[i], generation[against])
-                    played_against[i] = played_against.get(i, []) + [against]
-                    played_against[against] = (
-                        played_against.get(against, []) + [i]
-                    )
-
-                    if result == 1:
-                        scores[i] += 10
-                    elif result == 2:
-                        scores[against] += 10
-                    else:
-                        # tie
-                        scores[i] += 1
-                        scores[against] += 1
+                n_turns = compete(generation[i], [0.0, 1.0, 0.0])
+                scores[i] += MAX_TURNS - n_turns
 
             # select at most X population for the next generation
             best = [a[0]
@@ -131,14 +133,13 @@ if __name__ == "__main__":
                 next_generation.append(
                     crossover_avg(generation[pair[0]],
                                   generation[pair[1]]))
-                print(f'Offspring generated: {pair}')
+                print(f'Offspring generated between: {pair}')
                 if len(next_generation) == GENERATION_SIZE - RANDOM_FILL_SIZE:
                     break
 
             for i in range(len(next_generation), GENERATION_SIZE):
                 # fill the remaining space for the next generation with
                 # random individuals
-                print('Random individual generated')
                 next_generation.append(random_individual())
 
             assert len(generation) == GENERATION_SIZE
@@ -146,12 +147,3 @@ if __name__ == "__main__":
             n_generations += 1
 
     genetic_search()
-
-#    compete([0.43911791020540286, 0.5428449057332061, 0.01803718406139114],
-#            [0.1, 0.899, 0.001])
-
-#    compete([0.43911791020540286, 0.5428449057332061, 0.01803718406139114],
-#            [0.040261152062418745, 0.931160364509321, 0.02857848342826011])
-
-#    compete([0.040261152062418745, 0.931160364509321, 0.02857848342826011],
-#            [0.0, 1.0, 0.0])

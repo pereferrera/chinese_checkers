@@ -1,7 +1,7 @@
 import unittest
 
-from chinese_checkers.cc_movement import CCMovement
-from chinese_checkers.cc_game import CCGame
+from chinese_checkers.movement import CCMovement
+from chinese_checkers.game import CCGame
 
 from constants import (
     TEST_BOARD, TEST_BOARD_PLAYER_1_WINS, TEST_BOARD_PLAYER_2_WINS,

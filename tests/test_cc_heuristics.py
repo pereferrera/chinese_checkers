@@ -1,6 +1,6 @@
 import unittest
 
-from chinese_checkers.cc_game import CCGame
+from chinese_checkers.game import CCGame
 
 from constants import (
     TEST_BOARD_VA_1_1, TEST_BOARD_VA_1_2,
@@ -8,8 +8,8 @@ from constants import (
     TEST_BOARD_SQUARED_SUM, TEST_BOARD_SQUARED_SUM_ZERO,
     TEST_BOARD_CENTER_LINE
 )
-from chinese_checkers.cc_movement import CCMovement
-from chinese_checkers.cc_heuristics import CombinedVerticalAdvance,\
+from chinese_checkers.movement import CCMovement
+from chinese_checkers.heuristics import CombinedVerticalAdvance,\
     InvSquaredSumCenterLine, InvSquaredSumDestCorner, CombinedHeuristic
 from chinese_checkers.oc_heuristic import OptimizedCombinedHeuristic
 
@@ -71,6 +71,8 @@ class TestCCHeuristics(unittest.TestCase):
                         heuristic.value(game_2, 2))
 
     def test_optimized_combined_heuristic(self):
+        """test that the optimized, stateful heuristic provides the same
+        values as the non-optimized one"""
         heuristic = CombinedHeuristic()
         optimized_heuristic = OptimizedCombinedHeuristic()
 

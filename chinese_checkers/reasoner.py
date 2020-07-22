@@ -1,8 +1,15 @@
-from chinese_checkers.cc_game import CCGame
-from chinese_checkers.cc_movement import CCMovement
+from typing import List
+
+from chinese_checkers.game import CCGame
+from chinese_checkers.movement import CCMovement
+from chinese_checkers.move import CCMove
 
 
 class CCReasoner():
+    """
+    Base class for implementing players. Contains primitives like
+    calculating the possible moves given the current board.
+    """
 
     @staticmethod
     def _available_moves(game: CCGame,
@@ -10,12 +17,12 @@ class CCReasoner():
                          column: int,
                          player: int,
                          previous_moves: list=[],
-                         previous_positions: list=[]):
+                         previous_positions: list=[]) -> List[CCMove]:
         """
         Returns a dict a list of movements that the player
         can make, considering the piece found at 'row' and 'column'
         """
-        moves = []
+        moves: List[CCMove] = []
         jumping = game.player_can_only_jump
 
         def undo_movement():
@@ -38,7 +45,7 @@ class CCReasoner():
                 previous_positions.append((game.moved_to_row[-1],
                                            game.moved_to_column[-1]))
                 previous_moves.append(movement)
-                moves.append(([*previous_positions], [*previous_moves]))
+                moves.append(CCMove([*previous_positions], [*previous_moves]))
                 if turn == player:
                     # turn hasn't rotated -> current piece can still jump more
                     moves += (CCReasoner._available_moves(
@@ -55,7 +62,7 @@ class CCReasoner():
         return moves
 
     @staticmethod
-    def available_moves(game: CCGame, player: int):
+    def available_moves(game: CCGame, player: int) -> List[CCMove]:
         """
         Returns a list of movements that the player can make.
         The value sequence is made of pairs in which:
@@ -65,9 +72,9 @@ class CCReasoner():
             piece can apply in order to follow the traversed path
         """
         if player != game.player_turn:
-            return {}
+            return []
 
-        moves = []
+        moves: List[CCMove] = []
 
         for row in range(0, len(game.board)):
             for column in range(0, len(game.board[row])):

@@ -1,5 +1,6 @@
 import abc
-from chinese_checkers.cc_game import CCGame
+
+from chinese_checkers.game import CCGame
 
 
 class CCHeuristic(metaclass=abc.ABCMeta):
