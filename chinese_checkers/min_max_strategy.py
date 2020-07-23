@@ -181,10 +181,7 @@ class MinMaxStrategy(CCStrategy):
                     beta = min(beta, best_score)
                 if beta <= alpha:
                     # alpha/beta pruning
-                    if self.hasher:
-                        # save into transposition table
-                        tt[position_hash] = (best_move, best_score, depth)
-                    return (best_move, best_score)
+                    break
 
         if best_move:
             if self.hasher:
