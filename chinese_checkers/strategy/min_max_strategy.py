@@ -96,7 +96,7 @@ class MinMaxStrategy(CCStrategy):
                 a software bug
             """)
 
-        moves_queue = PriorityQueue()
+        moves_queue = PriorityQueue()  # type: ignore
 
         for move in moves:
             priority = 1

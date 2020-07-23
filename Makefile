@@ -1,9 +1,6 @@
 # no buildin rules and variables
 MAKEFLAGS =+ -rR --warn-undefined-variables
 
-IMAGE_BASE_NAME = ferrerabertran/chinese_checkers
-IMAGE_TAG = $(shell git describe --tags --always --dirty)
-
 create_env:
 	python3.7 -m venv venv --without-pip --system-site-packages
 	. venv/bin/activate && python3.7 -m pip install -r requirements.txt
@@ -21,5 +18,5 @@ lint:
 	. venv/bin/activate && flake8 chinese_checkers/
 
 static-typing:
-	. venv/bin/activate && mypy chinese_checkers/
+	. venv/bin/activate && mypy chinese_checkers/ --ignore-missing-imports
 

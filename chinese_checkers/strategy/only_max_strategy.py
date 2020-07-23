@@ -92,11 +92,17 @@ class OnlyMaxStrategy(CCStrategy):
             for _ in range(0, len(move.directions)):
                 game.undo_last_move()
 
-        if self.hasher and best_move:
-            # save into transposition table
-            self.transposition_table[position_hash] = (best_move, best_score,
-                                                       depth)
-        return (best_move, best_score)
+        if best_move:
+            if self.hasher:
+                # save into transposition table
+                self.transposition_table[position_hash] = (
+                    best_move, best_score, depth
+                )
+            return (best_move, best_score)
+        else:
+            raise AssertionError("""
+                No possible movements available, this must be a software bug
+            """)
 
     def select_move(self, game: CCGame, _: int) -> CCMove:
         if self.use_transposition_table:
@@ -104,5 +110,5 @@ class OnlyMaxStrategy(CCStrategy):
             if not self.hasher:
                 # initialize hasher (only once for each game instance)
                 self.hasher = CCZobristHash(game)
-        move, _ = self._select_move(game, 0)
+        move, __ = self._select_move(game, 0)
         return move

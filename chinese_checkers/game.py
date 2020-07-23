@@ -180,7 +180,7 @@ class CCGame:
         of the movement, jump it. If the movement is invalid, a ValueException
         is raised.
 
-        The board is modified and the player turned is rotated. In case
+        The board is modified and the player turn is rotated. In case
         the player has jumped a piece, and in case that more jumps are
         possible, the player turn is not rotated, indicating that the
         current player can still perform more moves.
@@ -233,9 +233,8 @@ class CCGame:
         return self.player_turn
 
     def apply_move_sequence(self, move_sequence: CCMove):
-        """Apply a sequence of possibly more than one move (e.g. by
-        jumping). move_sequence is a tuple:
-         - 0: list of positions the move sequence will traverse
+        """Apply a "move" - sequence of possibly more than one movement
+         (e.g. by jumping).
          - 1: list of CCMovement directions the move sequence will perform
         This function automatically rotates the turn if jumps are performed
         (it is assumed no more movements from the same player will follow).

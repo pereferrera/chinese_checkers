@@ -5,4 +5,7 @@ python:
 install:
   - make create_env
 # command to run tests
-script: make test
+script: 
+  - make lint
+  - make static-typing
+  - make test

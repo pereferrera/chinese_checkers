@@ -97,7 +97,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--player_row_span",
         type=int,
-        default=3,
+        default=4,
         help=("How many rows each player spans. These rows will be filled "
               "with pieces starting from the top or the bottom of th board "
               "e.g. 1 row=1 piece, 2 rows=3 pieces, 3 rows=6 pieces."))
