@@ -1,5 +1,9 @@
 from enum import Enum
 
+"""
+Represents a single possible movement of a piece in the board
+"""
+
 
 class CCMovement(Enum):
     L = 1  # left

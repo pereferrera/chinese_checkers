@@ -1,2 +1,5 @@
 .project
 .pydevproject
+.coverage
+venv
+.mypy_cache/
