@@ -84,7 +84,7 @@ class MinMaxStrategy(CCStrategy):
                 self.transposition_table_2
             )
             best_move, best_score, cached_depth = (
-                tt.get(position_hash, (None, -100000, -1))
+                tt.get(position_hash, (None, -100000.0, -1))
             )
             if best_move and cached_depth == depth:
                 return (best_move, best_score)
@@ -181,6 +181,9 @@ class MinMaxStrategy(CCStrategy):
                     beta = min(beta, best_score)
                 if beta <= alpha:
                     # alpha/beta pruning
+                    if self.hasher:
+                        # save into transposition table
+                        tt[position_hash] = (best_move, best_score, depth)
                     return (best_move, best_score)
 
         if best_move:

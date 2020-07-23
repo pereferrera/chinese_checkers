@@ -122,12 +122,10 @@ class TestMinMaxStrategy(unittest.TestCase):
 
         for _ in range(0, N_STEPS):
             m_tt = strat_tt.select_move(game, game.player_turn)
-            m_no_tt = strat_no_tt.select_move(game, game.player_turn)
 
-            print(m_tt)
-            print(m_no_tt)
-            print('---')
+            h_tt = strat_tt.heuristic.value(game, game.player_turn)
+            h_no_tt = strat_no_tt.heuristic.value(game, game.player_turn)
 
-            self.assertEqual(m_tt, m_no_tt)
+            self.assertAlmostEqual(h_tt, h_no_tt, 2)
 
             game.apply_move_sequence(m_tt)
