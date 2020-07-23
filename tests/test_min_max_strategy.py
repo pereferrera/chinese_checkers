@@ -1,6 +1,6 @@
 import unittest
 from chinese_checkers.game import CCGame
-from chinese_checkers.min_max_strategy import MinMaxStrategy
+from chinese_checkers.strategy.min_max_strategy import MinMaxStrategy
 
 from constants import (
     TEST_BOARD_STRATEGY_PLAYER_1_WINS_IN_TWO,

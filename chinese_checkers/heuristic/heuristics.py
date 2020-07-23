@@ -1,4 +1,4 @@
-from chinese_checkers.heuristic import CCHeuristic
+from chinese_checkers.heuristic.heuristic import CCHeuristic
 from chinese_checkers.game import CCGame
 
 

@@ -1,11 +1,11 @@
 from typing import Optional, Dict, Tuple
 
 from chinese_checkers.game import CCGame
-from chinese_checkers.heuristic import CCHeuristic
-from chinese_checkers.heuristics import CombinedHeuristic
+from chinese_checkers.heuristic.heuristic import CCHeuristic
+from chinese_checkers.heuristic.heuristics import CombinedHeuristic
 from chinese_checkers.helpers import CCZobristHash
 from chinese_checkers.move import CCMove
-from chinese_checkers.strategy import CCStrategy
+from chinese_checkers.strategy.strategy import CCStrategy
 
 
 class OnlyMaxStrategy(CCStrategy):

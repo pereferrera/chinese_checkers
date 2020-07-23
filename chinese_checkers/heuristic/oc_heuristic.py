@@ -1,5 +1,5 @@
 from chinese_checkers.game_visitor import GameVisitor
-from chinese_checkers.heuristic import CCHeuristic
+from chinese_checkers.heuristic.heuristic import CCHeuristic
 
 """
 Stateful heuristic made with performance in mind.

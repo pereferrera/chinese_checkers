@@ -96,7 +96,7 @@ TEST_BOARD_STRATEGY_PLAYER_1_WINS_IN_ONE = \
      [1, 1, 0],
      [1, 1],
      [1]]
-    
+
 
 TEST_BOARD_STRATEGY_PLAYER_1_WINS_IN_TWO = \
     [[0],
@@ -155,7 +155,7 @@ TEST_BOARD_SQUARED_SUM_ZERO = \
      [0, 0, 0],
      [0, 0],
      [2]]
-    
+
 TEST_BOARD_CENTER_LINE = \
     [[1],
      [0, 1],
@@ -177,4 +177,3 @@ TEST_BOARD_END_GAME = \
      [1, 0, 0],
      [1, 0],
      [1]]
-

@@ -7,9 +7,9 @@ from collections import Counter
 import numpy as np
 
 from chinese_checkers.game import CCGame
-from chinese_checkers.min_max_strategy import MinMaxStrategy
-from chinese_checkers.oc_heuristic import OptimizedCombinedHeuristic
-from chinese_checkers.only_max_strategy import OnlyMaxStrategy
+from chinese_checkers.strategy.min_max_strategy import MinMaxStrategy
+from chinese_checkers.heuristic.oc_heuristic import OptimizedCombinedHeuristic
+from chinese_checkers.strategy.only_max_strategy import OnlyMaxStrategy
 
 """
 Script for finding optimal weights for the combined heuristic

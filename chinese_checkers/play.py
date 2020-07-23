@@ -6,10 +6,10 @@ from typing import List, Dict
 from scipy import stats
 
 from chinese_checkers.game import CCGame
-from chinese_checkers.min_max_strategy import MinMaxStrategy
+from chinese_checkers.strategy.min_max_strategy import MinMaxStrategy
 from chinese_checkers.pygame_gui import PygameGUI
 from chinese_checkers.manual_player import ManualPlayer
-from chinese_checkers.oc_heuristic import OptimizedCombinedHeuristic
+from chinese_checkers.heuristic.oc_heuristic import OptimizedCombinedHeuristic
 
 
 """

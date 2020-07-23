@@ -18,7 +18,7 @@ class TestCCGame(unittest.TestCase):
             game_2 = CCGame(width=5)
             self.assertTrue(game == game_2)
             self.assertEqual(1, len(set([game, game_2])))
-            
+
         def test_board_equality_non_equals(self):
             game_1 = CCGame(width=5)
             game_1.board[1][0] = 0
@@ -26,7 +26,7 @@ class TestCCGame(unittest.TestCase):
             game_2 = CCGame(width=5)
             game_2.board[1][0] = 0
             game_2.board[3][2] = 1
-            
+
             self.assertFalse(game_1 == game_2)
             self.assertEqual(2, len(set([game_1, game_2])))
 
@@ -40,7 +40,7 @@ class TestCCGame(unittest.TestCase):
             game.board = TEST_BOARD_PLAYER_1_WINS
             self.assertEqual(1,
                              game.state())
-            
+
         def test_state_player_1_does_not_win(self):
             game = CCGame(width=5)
             game.board = TEST_BOARD_PLAYER_1_DOES_NOT_WIN
@@ -73,7 +73,7 @@ class TestCCGame(unittest.TestCase):
             game.move(2, 0, CCMovement.RS)
             self.assertEqual(0, game.board[2][0])
             self.assertEqual(1, game.board[3][1])
-    
+
         def test_allowed_move_no_jump_rs_2(self):
             game = CCGame(width=5)
             game.board[3][2] = 1

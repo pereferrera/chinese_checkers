@@ -1,12 +1,12 @@
 import unittest
-from chinese_checkers.game import CCGame
-from chinese_checkers.only_max_strategy import OnlyMaxStrategy
 
+from chinese_checkers.game import CCGame
+from chinese_checkers.strategy.only_max_strategy import OnlyMaxStrategy
 from constants import (
     TEST_BOARD_STRATEGY_PLAYER_1_WINS_IN_TWO,
     TEST_BOARD_STRATEGY_PLAYER_2_WINS_IN_TWO,
 )
-from chinese_checkers.heuristics import CombinedVerticalAdvance
+from chinese_checkers.heuristic.heuristics import CombinedVerticalAdvance
 
 
 class TestOnlyMaxStrategy(unittest.TestCase):

@@ -9,9 +9,9 @@ from constants import (
     TEST_BOARD_CENTER_LINE
 )
 from chinese_checkers.movement import CCMovement
-from chinese_checkers.heuristics import CombinedVerticalAdvance,\
+from chinese_checkers.heuristic.heuristics import CombinedVerticalAdvance,\
     InvSquaredSumCenterLine, InvSquaredSumDestCorner, CombinedHeuristic
-from chinese_checkers.oc_heuristic import OptimizedCombinedHeuristic
+from chinese_checkers.heuristic.oc_heuristic import OptimizedCombinedHeuristic
 
 
 class TestCCHeuristics(unittest.TestCase):
