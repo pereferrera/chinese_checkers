@@ -17,12 +17,12 @@ class MinMaxStrategy(CCStrategy):
     Optionally apply alpha-beta pruning and/or transposition table lookup
     """
 
-    def __init__(self, steps: int=1,
-                 alpha_beta_pruning: bool=True,
-                 pre_sort_moves: bool=False,
-                 extra_prunning: bool=False,
-                 transposition_table: bool=False,
-                 heuristic: CCHeuristic=CombinedHeuristic()):
+    def __init__(self, steps: int = 1,
+                 alpha_beta_pruning: bool = True,
+                 pre_sort_moves: bool = False,
+                 extra_prunning: bool = False,
+                 transposition_table: bool = False,
+                 heuristic: CCHeuristic = CombinedHeuristic()):
         self.steps = steps
         self.alpha_beta_pruning = alpha_beta_pruning
         self.pre_sort_moves = pre_sort_moves
@@ -149,8 +149,8 @@ class MinMaxStrategy(CCStrategy):
                     curr_score = -curr_score
             else:
                 if depth == self.steps * 2:  # maximizing
-                        # approximate the score of the game by
-                        # subtracting heuristics
+                    # approximate the score of the game by
+                    # subtracting heuristics
                     curr_score = (
                         self.heuristic.value(game, player) -
                         self.heuristic.value(game, 2 if player == 1 else 1)

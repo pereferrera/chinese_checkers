@@ -18,7 +18,7 @@ class GameVisitor(metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def on_init_game(self,
                      board: list):
-        raise NotImplemented
+        raise NotImplementedError
 
     @abc.abstractmethod
     def on_move(self,

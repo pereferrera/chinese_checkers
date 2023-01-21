@@ -18,9 +18,9 @@ class OnlyMaxStrategy(CCStrategy):
 
     def __init__(self,
                  player: int,
-                 steps: int=1,
-                 transposition_table: bool=False,
-                 heuristic: CCHeuristic=CombinedHeuristic()):
+                 steps: int = 1,
+                 transposition_table: bool = False,
+                 heuristic: CCHeuristic = CombinedHeuristic()):
         self.player = player
         self.steps = steps
         self.heuristic = heuristic

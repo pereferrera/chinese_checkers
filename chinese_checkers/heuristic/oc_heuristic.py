@@ -10,9 +10,10 @@ calculations.
 
 class OptimizedCombinedHeuristic(GameVisitor, CCHeuristic):
 
-    def __init__(self, weights: list=[0.01,
-                                      0.44,
-                                      0.55]):
+    def __init__(self, weights: list = [0.01,
+                                        0.44,
+                                        0.54,
+                                        0.01]):
         self.weights = weights
 
     def _values_of(self, row: int, column: int, player: int):
@@ -78,9 +79,19 @@ class OptimizedCombinedHeuristic(GameVisitor, CCHeuristic):
         Return the heuristic value between 0 and 1 with respect to the
         given player
         """
+        min_va = self.heigth
+        max_va = 0
+
+        for row in range(0, self.heigth):
+            for column in range(0, len(self.board[row])):
+                if self.board[row][column] == player:
+                    min_va = min(min_va, row)
+                    max_va = max(max_va, row)
+
         vals = self.value_1 if player == 1 else self.value_2
         a = self.weights[0] * (1 if vals[0] == 0 else min(1, 1 / vals[0]))
-        assert vals[1] < (self.heigth * self.pieces)
         b = self.weights[1] * (vals[1] / (self.heigth * self.pieces))
         c = self.weights[2] * (1 if vals[2] == 0 else 1 - min(1, 1 / vals[2]))
-        return (a + b + c)
+        d = self.weights[3] * ((1 - max(1, max_va - min_va)) / self.heigth)
+
+        return (a + b + c + d)

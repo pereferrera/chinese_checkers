@@ -4,9 +4,10 @@ from chinese_checkers.game import CCGame
 
 class CombinedHeuristic(CCHeuristic):
 
-    def __init__(self, weights: list=[0.01,
-                                      0.44,
-                                      0.55]):
+    def __init__(self, weights: list = [0.01,
+                                        0.44,
+                                        0.54,
+                                        0.01]):
         self.weights = weights
 
     def value(self, game: CCGame, player: int):
@@ -14,8 +15,33 @@ class CombinedHeuristic(CCHeuristic):
         return (
             self.weights[0] * InvSquaredSumCenterLine().value(game, player) +
             self.weights[1] * CombinedVerticalAdvance().value(game, player) +
-            self.weights[2] * InvSquaredSumDestCorner().value(game, player)
+            self.weights[2] * InvSquaredSumDestCorner().value(game, player) +
+            self.weights[3] * Clusteredness().value(game, player)
         )
+
+
+class Clusteredness(CCHeuristic):
+
+    def value(self, game: CCGame, player: int):
+        """
+        Returns:
+        -------
+        float
+            A metric between 1 and 0 of how clustered the pieces are
+            (contrary of spread). 1 = very clustered together
+        """
+        heigth = len(game.board)
+
+        min_va = heigth
+        max_va = 0
+
+        for row in range(0, heigth):
+            for column in range(0, len(game.board[row])):
+                if game.board[row][column] == player:
+                    min_va = min(min_va, row)
+                    max_va = max(max_va, row)
+
+        return (1 - max(1, max_va - min_va)) / heigth
 
 
 class CombinedVerticalAdvance(CCHeuristic):
@@ -30,6 +56,7 @@ class CombinedVerticalAdvance(CCHeuristic):
         """
         heigth = len(game.board)
         combined_va = 0
+
         pieces = 0
         for row in range(0, heigth):
             for column in range(0, len(game.board[row])):
@@ -38,6 +65,7 @@ class CombinedVerticalAdvance(CCHeuristic):
                     combined_va += (
                         row if player == 1 else (heigth - row - 1)
                     )
+
         return combined_va / (heigth * pieces)
 
 

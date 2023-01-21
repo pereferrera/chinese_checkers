@@ -22,18 +22,19 @@ def play(board_size: int, player_row_span: int):
 
     # (these weights were found running different experiments with the
     #  weight_search.py script)
-    oc_heuristic = OptimizedCombinedHeuristic(weights=[0.01,
-                                                       0.44,
-                                                       0.55])
+    oc_heuristic = OptimizedCombinedHeuristic(weights=[0.13214166541392974,
+                                                       0.5297777211424128,
+                                                       0.290789326515336,
+                                                       0.047291286928321644])
 
     game = CCGame(width=board_size,
                   player_row_span=player_row_span,
                   visitors=[oc_heuristic])
 
-    manual_players = set([2])
+    manual_players = set([1])
 
     ai_players = {
-        1: MinMaxStrategy(steps=1,
+        2: MinMaxStrategy(steps=1,
                           pre_sort_moves=True,
                           transposition_table=True,
                           heuristic=oc_heuristic)

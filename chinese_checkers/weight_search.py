@@ -21,13 +21,13 @@ Script for finding optimal weights for the combined heuristic
 """
 if __name__ == "__main__":
     random.seed(1)
-    N_WEIGHTS = 3
+    N_WEIGHTS = 4
     LOOK_AHEAD = 1
     GENERATION_SIZE = 12
     RANDOM_FILL_SIZE = 4
     SELECT_BEST = 4
     GAME_WIDTH = 7
-    # deliberately small number of pieces to avoid high probability of tie
+    # deliberate small number of pieces to avoid high probability of tie
     PLAYER_ROW_SPAN = 3
     MAX_TURNS = 200
 
@@ -56,7 +56,8 @@ if __name__ == "__main__":
                       visitors=[heuristic_1, heuristic_2])
 
         strategy_1 = MinMaxStrategy(
-            steps=LOOK_AHEAD, pre_sort_moves=True,
+            steps=LOOK_AHEAD,
+            pre_sort_moves=True,
             transposition_table=True,
             heuristic=heuristic_1)
         strategy_2 = OnlyMaxStrategy(
@@ -118,7 +119,7 @@ if __name__ == "__main__":
             scores = Counter()
 
             for i in range(0, GENERATION_SIZE):
-                n_turns = compete(generation[i], [0.0, 1.0, 0.0])
+                n_turns = compete(generation[i], [0.0, 1.0, 0.0, 0.0])
                 scores[i] += MAX_TURNS - n_turns
 
             # select at most X population for the next generation

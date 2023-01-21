@@ -20,9 +20,9 @@ class CCGame:
     MIN_BOARD_WIDTH = 5
 
     def __init__(self,
-                 width: int=5,
+                 width: int = 5,
                  player_row_span=3,
-                 visitors: ListOfGameVisitors=[]):
+                 visitors: ListOfGameVisitors = []):
         if width < 5:
             raise ValueError("Longest board row length can't be less than "
                              f"{self.MIN_BOARD_WIDTH}")

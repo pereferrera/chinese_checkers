@@ -16,8 +16,8 @@ class CCReasoner():
                          row: int,
                          column: int,
                          player: int,
-                         previous_moves: list=[],
-                         previous_positions: list=[]) -> List[CCMove]:
+                         previous_moves: list = [],
+                         previous_positions: list = []) -> List[CCMove]:
         """
         Returns a dict a list of movements that the player
         can make, considering the piece found at 'row' and 'column'
