@@ -1,5 +1,3 @@
-![Build Status](https://travis-ci.com/pereferrera/chinese_checkers.svg?branch=master)
-
 ## I did it just to beat my wife at chinese checkers
 
 Let's face it, I'm very bad at chinese checkers. And my wife is pretty good at it.
